@@ -1,0 +1,2303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>SPY GAME — Voice Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+/* ═══════════════════════════════════════════════════════════════════
+   SPY VOICE GAME — Stylesheet
+   Theme: Dark Ops / Classified-File aesthetic
+   Fonts: Bebas Neue (display) · Space Mono (code/mono) · Barlow (body)
+════════════════════════════════════════════════════════════════════ */
+
+/* ─── CSS Custom Properties ─────────────────────────────────────── */
+:root {
+  --bg-void   : #02050d;
+  --bg-dark   : #07101f;
+  --bg-card   : #0b1628;
+  --bg-input  : #0f1e35;
+  --bg-lift   : #142038;
+
+  --border    : rgba(255,255,255,0.07);
+  --border-hi : rgba(255,255,255,0.14);
+
+  --gold      : #d4a017;
+  --gold-dim  : #9e7910;
+  --gold-glow : rgba(212,160,23,0.25);
+  --blue      : #3ab7e8;
+  --blue-dim  : #1a6fa0;
+  --blue-glow : rgba(58,183,232,0.2);
+  --red       : #e63946;
+  --red-glow  : rgba(230,57,70,0.2);
+  --green     : #2dc78a;
+
+  --text-hi   : #eef2f8;
+  --text-mid  : #90a4be;
+  --text-lo   : #4a6280;
+
+  --radius    : 10px;
+  --radius-sm : 6px;
+  --radius-lg : 18px;
+
+  --font-display : 'Bebas Neue', sans-serif;
+  --font-mono    : 'Space Mono', monospace;
+  --font-body    : 'Barlow', sans-serif;
+
+  --timer-full: 163.36px; /* 2π × 26 — SVG circle circumference */
+}
+
+/* ─── Reset ──────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  background: var(--bg-void);
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Scanlines overlay ──────────────────────────────────────────── */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.08) 3px,
+    rgba(0,0,0,0.08) 4px
+  );
+  animation: scanMove 8s linear infinite;
+}
+@keyframes scanMove {
+  from { transform: translateY(0); }
+  to   { transform: translateY(4px); }
+}
+
+/* ─── App shell ──────────────────────────────────────────────────── */
+#app {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ─── Screens ────────────────────────────────────────────────────── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px 32px;
+  opacity: 0;
+  transform: translateY(24px);
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  overflow-y: auto;
+  min-height: 100vh;
+}
+.screen.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  position: relative;
+}
+
+/* ─── Cards ──────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+}
+
+/* ─── Form fields ────────────────────────────────────────────────── */
+.card-field { margin-bottom: 14px; }
+.field-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--text-lo);
+  margin-bottom: 6px;
+}
+.field-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius-sm);
+  color: var(--text-hi);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  padding: 11px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+.field-input::placeholder { color: var(--text-lo); }
+.field-code {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 22px;
+  text-align: center;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────── */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 13px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.2s;
+  text-transform: uppercase;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--gold);
+  color: #000;
+  box-shadow: 0 4px 18px var(--gold-glow);
+}
+.btn-primary:hover:not(:disabled) { box-shadow: 0 6px 28px var(--gold-glow); opacity: 0.92; }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--blue);
+  border: 1px solid var(--blue-dim);
+  box-shadow: 0 2px 10px var(--blue-glow);
+}
+.btn-secondary:hover:not(:disabled) { background: rgba(58,183,232,0.06); }
+
+.btn-danger {
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 4px 18px var(--red-glow);
+}
+.btn-danger:hover:not(:disabled) { opacity: 0.88; }
+
+.btn-sm { padding: 9px 16px; font-size: 11px; }
+
+/* ─── Divider ────────────────────────────────────────────────────── */
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 18px 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--text-lo);
+}
+.divider::before, .divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 38%;
+  height: 1px;
+  background: var(--border-hi);
+}
+.divider::before { left: 0; }
+.divider::after  { right: 0; }
+
+/* ─── Error message ──────────────────────────────────────────────── */
+.error-msg {
+  color: var(--red);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  min-height: 18px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.hidden { display: none !important; }
+
+/* ══════════════════════════════════════════════════════════════════
+   LOBBY SCREEN
+══════════════════════════════════════════════════════════════════ */
+
+.lobby-bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(212,160,23,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212,160,23,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.logo-lockup {
+  padding: 56px 0 36px;
+  text-align: center;
+}
+.logo-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  color: var(--gold-dim);
+  margin-bottom: 6px;
+}
+.logo-title {
+  font-family: var(--font-display);
+  font-size: clamp(56px, 16vw, 96px);
+  line-height: 0.9;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+  text-shadow: 0 0 40px var(--gold-glow), 0 0 80px var(--gold-glow);
+}
+.logo-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-lo);
+  margin-top: 8px;
+}
+
+.lobby-card { margin-top: 8px; }
+
+.lobby-footer {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--text-lo);
+  padding: 24px 0 12px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   WAITING ROOM
+══════════════════════════════════════════════════════════════════ */
+
+.waiting-header {
+  padding: 36px 0 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.room-code-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius);
+  padding: 10px 20px;
+}
+.badge-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--text-lo);
+}
+.badge-code {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+}
+.copy-btn {
+  background: none;
+  border: 1px solid var(--border-hi);
+  color: var(--text-mid);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.waiting-body { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+
+.section-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-lo);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.player-count {
+  background: var(--bg-lift);
+  border: 1px solid var(--border-hi);
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 10px;
+  color: var(--text-mid);
+}
+
+.players-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.player-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  animation: slideIn 0.25s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.player-avatar-sm {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--bg-lift);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.player-item-name {
+  font-size: 15px;
+  font-weight: 500;
+  flex: 1;
+}
+.host-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  background: rgba(212,160,23,0.1);
+  border: 1px solid rgba(212,160,23,0.2);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+.you-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: var(--blue);
+  background: rgba(58,183,232,0.1);
+  border: 1px solid rgba(58,183,232,0.2);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+.waiting-hint {
+  font-size: 13px;
+  color: var(--text-lo);
+  text-align: center;
+  font-family: var(--font-mono);
+}
+
+.mic-prompt {
+  background: var(--bg-card);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.mic-prompt-icon { font-size: 32px; }
+.mic-prompt p { font-size: 14px; color: var(--text-mid); }
+.mic-status { font-family: var(--font-mono); font-size: 11px; color: var(--green); }
+
+.btn-start { margin-top: auto; }
+.start-hint {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-lo);
+  letter-spacing: 0.08em;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ROLE REVEAL
+══════════════════════════════════════════════════════════════════ */
+
+.role-reveal-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 100vh;
+  gap: 24px;
+  padding: 40px 0;
+}
+
+.role-card {
+  width: 100%;
+  max-width: 320px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  animation: cardReveal 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes cardReveal {
+  from { opacity: 0; transform: scale(0.8) rotateX(20deg); }
+  to   { opacity: 1; transform: scale(1) rotateX(0); }
+}
+
+.role-card.role-spy {
+  border-color: rgba(230,57,70,0.4);
+  box-shadow: 0 0 40px rgba(230,57,70,0.15);
+}
+.role-card.role-player {
+  border-color: rgba(58,183,232,0.4);
+  box-shadow: 0 0 40px rgba(58,183,232,0.15);
+}
+
+.role-card-top {
+  padding: 32px 24px 24px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.role-card-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  color: var(--text-lo);
+  margin-bottom: 12px;
+}
+.role-icon { font-size: 52px; margin-bottom: 12px; }
+.role-name {
+  font-family: var(--font-display);
+  font-size: 42px;
+  letter-spacing: 0.06em;
+}
+.role-card.role-spy .role-name { color: var(--red); }
+.role-card.role-player .role-name { color: var(--blue); }
+
+.role-word-section { padding: 20px 24px; text-align: center; }
+.role-word-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--text-lo);
+  margin-bottom: 8px;
+}
+.role-word {
+  font-family: var(--font-display);
+  font-size: 34px;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+}
+
+.role-spy-section { padding: 20px 24px; text-align: center; }
+.role-spy-msg {
+  font-size: 14px;
+  color: var(--text-mid);
+  line-height: 1.6;
+}
+
+.role-countdown-msg {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-lo);
+  letter-spacing: 0.1em;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   GAME SCREEN
+══════════════════════════════════════════════════════════════════ */
+
+.game-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0 8px;
+  gap: 12px;
+}
+
+.round-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--text-lo);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+
+/* SVG Timer Ring */
+.timer-wrapper { display: flex; align-items: center; justify-content: center; }
+.timer-ring { position: relative; width: 60px; height: 60px; }
+.timer-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.timer-bg  { fill: none; stroke: var(--bg-lift); stroke-width: 4; }
+.timer-arc {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: var(--timer-full);
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
+}
+.timer-arc.urgent { stroke: var(--red); }
+.timer-num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--gold);
+  transition: color 0.5s;
+}
+.timer-num.urgent { color: var(--red); }
+
+.word-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold);
+  background: rgba(212,160,23,0.1);
+  border: 1px solid rgba(212,160,23,0.2);
+  border-radius: 20px;
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+
+/* ─── Stage / Chairs ─────────────────────────────────────────────── */
+.stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 24px 0 20px;
+  position: relative;
+}
+.stage::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-hi), transparent);
+}
+
+.chair {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  padding: 0 8px;
+}
+
+.chair-avatar-ring {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.chair-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--bg-lift);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 36px;
+  color: var(--text-hi);
+  border: 2px solid var(--border-hi);
+  position: relative;
+  z-index: 1;
+}
+.chair.speaking .chair-avatar {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 4px var(--gold-glow);
+}
+
+.pulse-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  opacity: 0;
+  pointer-events: none;
+}
+.chair.speaking .pulse-ring {
+  animation: pulseSpeaker 1.4s ease-out infinite;
+}
+@keyframes pulseSpeaker {
+  0%   { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.45); }
+}
+
+.chair-name {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-hi);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chair-indicator {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--text-lo);
+  height: 16px;
+}
+.chair.speaking .chair-indicator {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.stage-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  flex-shrink: 0;
+}
+.live-badge {
+  background: var(--red);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  border-radius: 3px;
+  padding: 2px 6px;
+  animation: livePulse 2s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.mic-icon { font-size: 22px; }
+
+/* ─── My status banner ───────────────────────────────────────────── */
+.my-status-banner {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  margin: 4px 0 16px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.my-status-banner.speaking {
+  background: rgba(212,160,23,0.12);
+  border: 1px solid rgba(212,160,23,0.25);
+  color: var(--gold);
+}
+.my-status-banner.listening {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-lo);
+}
+
+/* ─── Audience row ───────────────────────────────────────────────── */
+.audience-section {
+  padding-top: 4px;
+}
+.audience-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--text-lo);
+  margin-bottom: 10px;
+}
+.audience-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.audience-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px 5px 5px;
+  font-size: 13px;
+}
+.audience-avatar {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--bg-lift);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--text-mid);
+}
+
+/* ─── Round transition overlay ───────────────────────────────────── */
+.round-transition {
+  position: absolute;
+  inset: 0;
+  background: rgba(2,5,13,0.88);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 10;
+  border-radius: 0;
+  backdrop-filter: blur(4px);
+}
+.transition-text {
+  font-family: var(--font-display);
+  font-size: 36px;
+  letter-spacing: 0.06em;
+  color: var(--text-hi);
+}
+.transition-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--text-lo);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   VOTING SCREEN
+══════════════════════════════════════════════════════════════════ */
+
+.voting-header {
+  padding: 36px 0 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.voting-title {
+  font-family: var(--font-display);
+  font-size: 38px;
+  letter-spacing: 0.06em;
+  color: var(--text-hi);
+  line-height: 1;
+}
+.vote-timer-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--text-lo);
+}
+.vote-timer-num {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-hi);
+  line-height: 1.1;
+}
+
+.voting-sub {
+  font-size: 13px;
+  color: var(--text-mid);
+  margin-bottom: 20px;
+}
+
+.vote-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.vote-candidate {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+.vote-candidate:hover {
+  border-color: var(--border-hi);
+  transform: translateY(-2px);
+}
+.vote-candidate.voted {
+  border-color: var(--red);
+  box-shadow: 0 0 16px var(--red-glow);
+}
+.vote-candidate.disabled { cursor: not-allowed; opacity: 0.55; }
+.vote-candidate-avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--bg-lift);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--text-hi);
+}
+.vote-candidate-name {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+.vote-candidate-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-lo);
+}
+.vote-candidate.voted .vote-candidate-count { color: var(--red); }
+
+.vote-progress {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--text-lo);
+  margin-bottom: 16px;
+}
+
+/* Spy guess panel */
+.spy-guess-panel {
+  background: rgba(230,57,70,0.08);
+  border: 1px solid rgba(230,57,70,0.25);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 12px;
+  animation: slideIn 0.3s ease;
+}
+.spy-guess-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--red);
+  margin-bottom: 12px;
+}
+.spy-guess-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.spy-guess-form .field-input { flex: 1; }
+.spy-guess-form .btn { width: auto; flex-shrink: 0; padding: 11px 16px; }
+.spy-guess-countdown {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-lo);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   VOTE RESULT SCREEN
+══════════════════════════════════════════════════════════════════ */
+
+.vote-result-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 100vh;
+  gap: 16px;
+  padding: 40px 0;
+  text-align: center;
+}
+.vote-result-icon { font-size: 72px; animation: bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes bounceIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.vote-result-headline {
+  font-family: var(--font-display);
+  font-size: 36px;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+.vote-result-sub {
+  font-size: 15px;
+  color: var(--text-mid);
+  max-width: 280px;
+}
+.spy-guess-awaiting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-lo);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 8px 16px;
+  margin-top: 8px;
+}
+.pulse-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: dotPulse 1s ease-in-out infinite;
+}
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.5; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   FINAL RESULTS SCREEN
+══════════════════════════════════════════════════════════════════ */
+
+.result-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.07;
+}
+.result-bg.players-win {
+  background: radial-gradient(ellipse at 50% 30%, var(--blue), transparent 60%);
+}
+.result-bg.spy-wins {
+  background: radial-gradient(ellipse at 50% 30%, var(--red), transparent 60%);
+}
+
+.results-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 100vh;
+  gap: 16px;
+  padding: 48px 0 40px;
+  text-align: center;
+}
+.result-trophy { font-size: 72px; animation: trophySpin 0.7s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes trophySpin {
+  from { transform: rotate(-30deg) scale(0); opacity: 0; }
+  to   { transform: rotate(0) scale(1); opacity: 1; }
+}
+.result-winner {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--text-lo);
+}
+.result-headline {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 10vw, 52px);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.result-headline.players { color: var(--blue); }
+.result-headline.spy     { color: var(--red); }
+
+.result-details-card {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 8px 0;
+  text-align: left;
+}
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.result-row:last-child { padding-bottom: 0; border-bottom: none; }
+.result-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--text-lo);
+  flex-shrink: 0;
+}
+.result-word  { font-family: var(--font-display); font-size: 22px; color: var(--gold); }
+.result-spy   { font-size: 15px; font-weight: 600; color: var(--red); }
+.result-guess { font-size: 14px; color: var(--text-mid); }
+.result-reason { font-size: 13px; color: var(--text-mid); text-align: right; }
+
+/* ══════════════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE
+══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 400px) {
+  .logo-title { font-size: 52px; }
+  .chair-avatar { width: 64px; height: 64px; font-size: 28px; }
+  .chair-avatar-ring { width: 64px; height: 64px; }
+  .vote-grid { grid-template-columns: 1fr; }
+  .voting-title { font-size: 30px; }
+}
+
+@media (min-height: 750px) {
+  .logo-lockup { padding-top: 72px; }
+}
+
+/* ─── Scrollbar styling ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- Scanline overlay (CSS-only atmospheric texture) -->
+<div class="scanlines" aria-hidden="true"></div>
+
+<div id="app">
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN 1 — LOBBY
+  ════════════════════════════════════════════════════════════════ -->
+  <section id="screen-lobby" class="screen active">
+    <div class="lobby-bg-grid" aria-hidden="true"></div>
+
+    <header class="logo-lockup">
+      <div class="logo-eyebrow">CLASSIFIED OPERATION</div>
+      <h1 class="logo-title">SPY GAME</h1>
+      <div class="logo-sub">Voice-Only Social Deduction</div>
+    </header>
+
+    <div class="card lobby-card">
+      <div class="card-field">
+        <label for="username-input" class="field-label">YOUR CODENAME</label>
+        <input id="username-input" type="text" class="field-input" placeholder="Enter codename…" maxlength="20" autocomplete="off" />
+      </div>
+
+      <button id="btn-create" class="btn btn-primary">Create New Room</button>
+
+      <div class="divider"><span>OR JOIN EXISTING</span></div>
+
+      <div class="card-field">
+        <label for="roomcode-input" class="field-label">ROOM CODE</label>
+        <input id="roomcode-input" type="text" class="field-input field-code" placeholder="ABC123" maxlength="6" autocomplete="off" />
+      </div>
+
+      <button id="btn-join" class="btn btn-secondary">Join Room</button>
+
+      <p id="lobby-error" class="error-msg" role="alert"></p>
+    </div>
+
+    <footer class="lobby-footer">🎙 Voice-only interaction · Up to 8 players · No text chat</footer>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN 2 — WAITING ROOM
+  ════════════════════════════════════════════════════════════════ -->
+  <section id="screen-waiting" class="screen">
+    <div class="waiting-header">
+      <div class="room-code-badge">
+        <span class="badge-label">ROOM CODE</span>
+        <span id="display-roomcode" class="badge-code"></span>
+        <button id="btn-copy-code" class="copy-btn" title="Copy code">⎘</button>
+      </div>
+    </div>
+
+    <div class="waiting-body">
+      <div class="section-title">AGENTS IN FIELD
+        <span id="player-count-badge" class="player-count">0/8</span>
+      </div>
+
+      <ul id="players-list" class="players-list" aria-live="polite"></ul>
+
+      <p id="waiting-hint" class="waiting-hint">Share the room code with your agents.</p>
+
+      <div id="mic-prompt" class="mic-prompt hidden">
+        <div class="mic-prompt-icon">🎙</div>
+        <p>This game requires microphone access.</p>
+        <button id="btn-mic-permission" class="btn btn-secondary btn-sm">Grant Microphone Access</button>
+        <p id="mic-status" class="mic-status"></p>
+      </div>
+
+      <button id="btn-start" class="btn btn-primary btn-start hidden">Start Mission</button>
+      <p id="start-hint" class="start-hint hidden">Need at least 3 players.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN 3 — ROLE REVEAL
+  ════════════════════════════════════════════════════════════════ -->
+  <section id="screen-role" class="screen">
+    <div class="role-reveal-wrapper">
+      <div id="role-card" class="role-card">
+        <div class="role-card-top">
+          <div class="role-card-label">YOUR ROLE</div>
+          <div id="role-icon" class="role-icon"></div>
+          <div id="role-name" class="role-name"></div>
+        </div>
+        <div id="role-word-section" class="role-word-section">
+          <div class="role-word-label">THE SECRET WORD IS</div>
+          <div id="role-word" class="role-word"></div>
+        </div>
+        <div id="role-spy-section" class="role-spy-section hidden">
+          <div class="role-spy-msg">You do NOT know the word.<br>Blend in. Don't get caught.</div>
+        </div>
+      </div>
+      <p class="role-countdown-msg">Game starting in <span id="role-countdown">4</span>s…</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN 4 — GAME (ROUNDS)
+  ════════════════════════════════════════════════════════════════ -->
+  <section id="screen-game" class="screen">
+    <div class="game-topbar">
+      <div class="round-badge">
+        ROUND <span id="current-round">1</span> / <span id="total-rounds">5</span>
+      </div>
+      <div class="timer-wrapper">
+        <div id="timer-ring" class="timer-ring">
+          <svg class="timer-svg" viewBox="0 0 60 60" aria-hidden="true">
+            <circle class="timer-bg"  cx="30" cy="30" r="26" />
+            <circle id="timer-arc" class="timer-arc" cx="30" cy="30" r="26" />
+          </svg>
+          <span id="timer-num" class="timer-num">30</span>
+        </div>
+      </div>
+      <div id="word-chip" class="word-chip hidden">
+        🔑 <span id="word-chip-text"></span>
+      </div>
+    </div>
+
+    <div class="stage" aria-label="Active speakers">
+      <div class="chair" id="chair-a">
+        <div class="chair-avatar-ring">
+          <div class="chair-avatar" id="avatar-a"></div>
+          <div class="pulse-ring" aria-hidden="true"></div>
+        </div>
+        <div class="chair-name" id="name-a">—</div>
+        <div class="chair-indicator" id="ind-a"></div>
+      </div>
+      <div class="stage-center">
+        <div class="live-badge">LIVE</div>
+        <div class="mic-icon">🎙</div>
+      </div>
+      <div class="chair" id="chair-b">
+        <div class="chair-avatar-ring">
+          <div class="chair-avatar" id="avatar-b"></div>
+          <div class="pulse-ring" aria-hidden="true"></div>
+        </div>
+        <div class="chair-name" id="name-b">—</div>
+        <div class="chair-indicator" id="ind-b"></div>
+      </div>
+    </div>
+
+    <div id="my-status-banner" class="my-status-banner"></div>
+
+    <div class="audience-section">
+      <div class="audience-label">LISTENING</div>
+      <div id="audience-row" class="audience-row"></div>
+    </div>
+
+    <div id="round-transition" class="round-transition hidden">
+      <div class="transition-text" id="transition-text">Round ended</div>
+      <div class="transition-sub">Next round starting…</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN 5 — VOTING
+  ════════════════════════════════════════════════════════════════ -->
+  <section id="screen-voting" class="screen">
+    <div class="voting-header">
+      <h2 class="voting-title">WHO IS THE SPY?</h2>
+      <div class="vote-timer-wrapper">
+        <span class="vote-timer-label">Time left:</span>
+        <span id="vote-timer-num" class="vote-timer-num">45</span>s
+      </div>
+    </div>
+
+    <p class="voting-sub">Tap a player to cast your vote. The most-voted agent will be exposed.</p>
+
+    <div id="vote-grid" class="vote-grid" role="group" aria-label="Vote candidates"></div>
+
+    <div id="vote-progress" class="vote-progress">
+      <span id="votes-cast">0</span> / <span id="votes-total">0</span> votes cast
+    </div>
+
+    <div id="spy-guess-panel" class="spy-guess-panel hidden">
+      <div class="spy-guess-title">You were exposed! Guess the word to win:</div>
+      <div class="spy-guess-form">
+        <input id="spy-guess-input" type="text" class="field-input" placeholder="Your guess…" maxlength="40" />
+        <button id="btn-spy-guess" class="btn btn-danger">Submit</button>
+      </div>
+      <div id="spy-guess-countdown" class="spy-guess-countdown"></div>
+    </div>
+
+    <p id="voting-error" class="error-msg" role="alert"></p>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN 6 — VOTE RESULT
+  ════════════════════════════════════════════════════════════════ -->
+  <section id="screen-vote-result" class="screen">
+    <div class="vote-result-wrapper">
+      <div id="vote-result-icon" class="vote-result-icon"></div>
+      <div id="vote-result-headline" class="vote-result-headline"></div>
+      <div id="vote-result-sub" class="vote-result-sub"></div>
+      <div id="spy-guess-awaiting" class="spy-guess-awaiting hidden">
+        <div class="pulse-dot"></div>
+        Waiting for spy to guess the word…
+        <span id="guess-countdown"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN 7 — FINAL RESULT
+  ════════════════════════════════════════════════════════════════ -->
+  <section id="screen-results" class="screen">
+    <div id="result-bg" class="result-bg"></div>
+    <div class="results-wrapper">
+      <div id="result-trophy" class="result-trophy"></div>
+      <div id="result-winner" class="result-winner"></div>
+      <div id="result-headline" class="result-headline"></div>
+
+      <div class="result-details-card">
+        <div class="result-row">
+          <span class="result-label">THE WORD WAS</span>
+          <span id="result-word" class="result-word"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">THE SPY WAS</span>
+          <span id="result-spy" class="result-spy"></span>
+        </div>
+        <div id="result-guess-row" class="result-row hidden">
+          <span class="result-label">SPY GUESSED</span>
+          <span id="result-guess" class="result-guess"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">REASON</span>
+          <span id="result-reason" class="result-reason"></span>
+        </div>
+      </div>
+
+      <button id="btn-play-again" class="btn btn-primary">Play Again</button>
+    </div>
+  </section>
+
+</div><!-- /#app -->
+
+<div id="audio-container" aria-hidden="true" style="display:none;"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+/**
+ * SPY VOICE GAME — Client
+ *
+ * Modules:
+ *  - State           : global client state
+ *  - ScreenManager   : show/hide screens
+ *  - WebRTCManager   : peer mesh, audio mute/unmute
+ *  - SocketManager   : all Socket.IO events
+ *  - TimerManager    : countdown display
+ *  - UIManager       : render helpers for all screens
+ */
+
+/* ════════════════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════════════════ */
+
+const State = {
+  socket        : null,
+  myId          : null,      // socket.id
+  myUsername    : '',
+  roomCode      : '',
+  isHost        : false,
+  role          : null,      // 'spy' | 'player'
+  word          : null,      // secret word (null if spy)
+  players       : [],        // [{ id, username, isHost }]
+  totalRounds   : 5,
+  currentRound  : 0,
+  activePair    : [],        // [{id, username}, ...]  — current speaking pair
+  hasVoted      : false,
+  spyGuessOpen  : false,
+};
+
+/* ════════════════════════════════════════════════════════════════
+   WEBRTC MANAGER
+   - Manages a full mesh: one RTCPeerConnection per remote player
+   - Mic is unmuted only when we are in the active speaking pair
+════════════════════════════════════════════════════════════════ */
+
+const WebRTCManager = (() => {
+  // Map of peerId → RTCPeerConnection
+  const peers = new Map();
+
+  // Buffers for ICE candidates that arrive before remote description is set
+  const pendingCandidates = new Map(); // peerId → [RTCIceCandidate]
+
+  // Our local microphone stream
+  let localStream = null;
+
+  // STUN servers — using Google's free STUN
+  const ICE_SERVERS = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+    ],
+  };
+
+  /** Request microphone access from the browser */
+  async function requestMic() {
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation : true,
+          noiseSuppression : true,
+          sampleRate       : 48000,
+        },
+        video: false,
+      });
+      // Start muted — only unmute when we're in the active pair
+      setMicEnabled(false);
+      return true;
+    } catch (err) {
+      console.error('[WebRTC] Mic access denied:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Create a peer connection to a remote player.
+   * @param {string}  peerId    - remote socket ID
+   * @param {boolean} initiator - true = we create offer, false = we wait for offer
+   */
+  async function connect(peerId, initiator) {
+    if (peers.has(peerId)) return; // already connected
+
+    const pc = new RTCPeerConnection(ICE_SERVERS);
+    peers.set(peerId, pc);
+
+    // Attach our local audio tracks to this connection
+    if (localStream) {
+      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+    }
+
+    // Play remote audio when their track arrives
+    pc.ontrack = (event) => {
+      const stream = event.streams[0] || new MediaStream([event.track]);
+      _playRemoteStream(peerId, stream);
+    };
+
+    // Relay ICE candidates through Socket.IO signaling server
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        State.socket.emit('webrtc:ice', { to: peerId, candidate: event.candidate });
+      }
+    };
+
+    pc.onconnectionstatechange = () => {
+      console.log(`[WebRTC] ${peerId} → ${pc.connectionState}`);
+      if (pc.connectionState === 'failed') {
+        pc.restartIce(); // attempt reconnection
+      }
+    };
+
+    // Initiator sends the offer
+    if (initiator) {
+      try {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        State.socket.emit('webrtc:offer', { to: peerId, offer: pc.localDescription });
+      } catch (e) {
+        console.error('[WebRTC] Offer error:', e);
+      }
+    }
+  }
+
+  /**
+   * Handle an incoming offer from a remote peer (we are the non-initiator).
+   */
+  async function handleOffer(fromId, offer) {
+    // Create connection if not yet established
+    if (!peers.has(fromId)) {
+      await connect(fromId, false);
+    }
+    const pc = peers.get(fromId);
+    if (!pc) return;
+
+    try {
+      await pc.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      State.socket.emit('webrtc:answer', { to: fromId, answer: pc.localDescription });
+
+      // Flush any ICE candidates that arrived before remote description
+      await _flushPendingCandidates(fromId, pc);
+    } catch (e) {
+      console.error('[WebRTC] Handle offer error:', e);
+    }
+  }
+
+  /**
+   * Handle an answer to our offer.
+   */
+  async function handleAnswer(fromId, answer) {
+    const pc = peers.get(fromId);
+    if (!pc) return;
+    try {
+      await pc.setRemoteDescription(new RTCSessionDescription(answer));
+      await _flushPendingCandidates(fromId, pc);
+    } catch (e) {
+      console.error('[WebRTC] Handle answer error:', e);
+    }
+  }
+
+  /**
+   * Handle an incoming ICE candidate.
+   * Buffer it if the peer connection isn't ready yet.
+   */
+  async function handleIce(fromId, candidate) {
+    const pc = peers.get(fromId);
+    if (!pc || !pc.remoteDescription) {
+      // Buffer until remote description is set
+      if (!pendingCandidates.has(fromId)) pendingCandidates.set(fromId, []);
+      pendingCandidates.get(fromId).push(candidate);
+      return;
+    }
+    try {
+      await pc.addIceCandidate(new RTCIceCandidate(candidate));
+    } catch (e) {
+      console.warn('[WebRTC] ICE candidate error:', e);
+    }
+  }
+
+  /**
+   * Enable/disable our microphone track.
+   * This controls whether remote peers can hear us.
+   */
+  function setMicEnabled(enabled) {
+    if (!localStream) return;
+    localStream.getAudioTracks().forEach(track => {
+      track.enabled = enabled;
+    });
+    console.log(`[WebRTC] Mic ${enabled ? 'ON 🎙' : 'OFF 🔇'}`);
+  }
+
+  /**
+   * Called each round: mute/unmute based on whether we are in the active pair.
+   */
+  function updateSpeakerStatus(activePairIds) {
+    const isSpeaking = activePairIds.includes(State.myId);
+    setMicEnabled(isSpeaking);
+    return isSpeaking;
+  }
+
+  /** Close a single peer connection (on player leave) */
+  function closePeer(peerId) {
+    const pc = peers.get(peerId);
+    if (pc) { pc.close(); peers.delete(peerId); }
+    pendingCandidates.delete(peerId);
+    // Remove their audio element
+    const el = document.getElementById(`audio-${peerId}`);
+    if (el) el.remove();
+  }
+
+  /** Close all connections (on game end / leave) */
+  function closeAll() {
+    peers.forEach((pc, id) => closePeer(id));
+    if (localStream) {
+      localStream.getTracks().forEach(t => t.stop());
+      localStream = null;
+    }
+  }
+
+  // ─── Private helpers ───────────────────────────────────────────
+
+  function _playRemoteStream(peerId, stream) {
+    let audio = document.getElementById(`audio-${peerId}`);
+    if (!audio) {
+      audio = document.createElement('audio');
+      audio.id       = `audio-${peerId}`;
+      audio.autoplay = true;
+      audio.playsInline = true;
+      document.getElementById('audio-container').appendChild(audio);
+    }
+    audio.srcObject = stream;
+  }
+
+  async function _flushPendingCandidates(peerId, pc) {
+    const candidates = pendingCandidates.get(peerId) || [];
+    for (const c of candidates) {
+      try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch (_) {}
+    }
+    pendingCandidates.delete(peerId);
+  }
+
+  return { requestMic, connect, handleOffer, handleAnswer, handleIce, updateSpeakerStatus, closePeer, closeAll };
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   TIMER MANAGER
+════════════════════════════════════════════════════════════════ */
+
+const TimerManager = (() => {
+  let interval = null;
+  let remaining = 0;
+  const CIRCUMFERENCE = 163.36; // 2π × 26px radius
+
+  function start(seconds, { onTick, onEnd, numEl, arcEl } = {}) {
+    stop();
+    remaining = seconds;
+    _render(remaining, seconds, numEl, arcEl);
+
+    interval = setInterval(() => {
+      remaining--;
+      _render(remaining, seconds, numEl, arcEl);
+      if (onTick) onTick(remaining);
+      if (remaining <= 0) {
+        stop();
+        if (onEnd) onEnd();
+      }
+    }, 1000);
+  }
+
+  function stop() {
+    if (interval) { clearInterval(interval); interval = null; }
+  }
+
+  function _render(current, total, numEl, arcEl) {
+    if (numEl) numEl.textContent = Math.max(0, current);
+
+    if (arcEl) {
+      const ratio   = Math.max(0, current / total);
+      const offset  = CIRCUMFERENCE * (1 - ratio);
+      arcEl.style.strokeDashoffset = offset;
+      const urgent = current <= 10;
+      arcEl.classList.toggle('urgent', urgent);
+      if (numEl) numEl.classList.toggle('urgent', urgent);
+    }
+  }
+
+  return { start, stop };
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   SCREEN MANAGER
+════════════════════════════════════════════════════════════════ */
+
+const ScreenManager = (() => {
+  function show(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(`screen-${screenId}`);
+    if (el) el.classList.add('active');
+  }
+  return { show };
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   UI MANAGER — render helpers
+════════════════════════════════════════════════════════════════ */
+
+const UIManager = (() => {
+
+  /** Colour palette for player avatars */
+  const AVATAR_COLORS = [
+    '#d4a017','#3ab7e8','#e63946','#2dc78a',
+    '#a855f7','#f97316','#ec4899','#14b8a6',
+  ];
+  const playerColorMap = new Map(); // id → color index
+
+  function getPlayerColor(id) {
+    if (!playerColorMap.has(id)) {
+      playerColorMap.set(id, playerColorMap.size % AVATAR_COLORS.length);
+    }
+    return AVATAR_COLORS[playerColorMap.get(id)];
+  }
+
+  function avatarLetter(username) {
+    return username ? username[0].toUpperCase() : '?';
+  }
+
+  // ─── Waiting Room ─────────────────────────────────────────────
+
+  function renderPlayersList(players) {
+    const list  = document.getElementById('players-list');
+    const count = document.getElementById('player-count-badge');
+    if (!list) return;
+
+    list.innerHTML = '';
+    players.forEach(p => {
+      const color = getPlayerColor(p.id);
+      const li    = document.createElement('li');
+      li.className = 'player-item';
+      li.innerHTML = `
+        <div class="player-avatar-sm" style="color:${color}">${avatarLetter(p.username)}</div>
+        <span class="player-item-name">${escHtml(p.username)}</span>
+        ${p.isHost             ? '<span class="host-badge">HOST</span>' : ''}
+        ${p.id === State.myId  ? '<span class="you-badge">YOU</span>'  : ''}
+      `;
+      list.appendChild(li);
+    });
+
+    if (count) count.textContent = `${players.length}/8`;
+  }
+
+  function updateStartButton(playerCount) {
+    const btn   = document.getElementById('btn-start');
+    const hint  = document.getElementById('start-hint');
+    if (!btn) return;
+
+    if (State.isHost) {
+      btn.classList.remove('hidden');
+      btn.disabled = playerCount < 3;
+      if (hint) hint.classList.toggle('hidden', playerCount >= 3);
+    }
+  }
+
+  // ─── Role Reveal ──────────────────────────────────────────────
+
+  function showRoleReveal(role, word) {
+    ScreenManager.show('role');
+    const card     = document.getElementById('role-card');
+    const icon     = document.getElementById('role-icon');
+    const name     = document.getElementById('role-name');
+    const wordSec  = document.getElementById('role-word-section');
+    const wordEl   = document.getElementById('role-word');
+    const spySec   = document.getElementById('role-spy-section');
+    const countdown = document.getElementById('role-countdown');
+
+    card.className = `role-card role-${role}`;
+    icon.textContent = role === 'spy' ? '🕵️' : '🔍';
+    name.textContent = role === 'spy' ? 'THE SPY' : 'AGENT';
+
+    if (role === 'spy') {
+      wordSec.classList.add('hidden');
+      spySec.classList.remove('hidden');
+    } else {
+      wordSec.classList.remove('hidden');
+      spySec.classList.add('hidden');
+      if (wordEl) wordEl.textContent = word;
+    }
+
+    // Countdown to game start
+    let n = 4;
+    if (countdown) countdown.textContent = n;
+    const t = setInterval(() => {
+      n--;
+      if (countdown) countdown.textContent = Math.max(0, n);
+      if (n <= 0) clearInterval(t);
+    }, 1000);
+  }
+
+  // ─── Game Screen ──────────────────────────────────────────────
+
+  function renderRound(roundData) {
+    const { roundNumber, totalRounds, activePlayers } = roundData;
+
+    document.getElementById('current-round').textContent = roundNumber;
+    document.getElementById('total-rounds').textContent  = totalRounds;
+
+    const [p1, p2] = activePlayers;
+
+    // Avatar A
+    const avA  = document.getElementById('avatar-a');
+    const namA = document.getElementById('name-a');
+    const indA = document.getElementById('ind-a');
+    if (avA) { avA.textContent = avatarLetter(p1.username); avA.style.color = getPlayerColor(p1.id); }
+    if (namA) namA.textContent = p1.username;
+
+    // Avatar B
+    const avB  = document.getElementById('avatar-b');
+    const namB = document.getElementById('name-b');
+    const indB = document.getElementById('ind-b');
+    if (avB) { avB.textContent = avatarLetter(p2.username); avB.style.color = getPlayerColor(p2.id); }
+    if (namB) namB.textContent = p2.username;
+
+    // Speaking indicators
+    const isMeA = p1.id === State.myId;
+    const isMeB = p2.id === State.myId;
+
+    document.getElementById('chair-a')?.classList.toggle('speaking', true);
+    document.getElementById('chair-b')?.classList.toggle('speaking', true);
+
+    if (indA) indA.textContent = isMeA ? '🎙 YOU' : '🎙';
+    if (indB) indB.textContent = isMeB ? '🎙 YOU' : '🎙';
+
+    // My status banner
+    const banner = document.getElementById('my-status-banner');
+    if (banner) {
+      if (isMeA || isMeB) {
+        banner.className = 'my-status-banner speaking';
+        banner.textContent = '🎙 YOU ARE SPEAKING — Your mic is live';
+      } else {
+        banner.className = 'my-status-banner listening';
+        banner.textContent = '👂 YOU ARE LISTENING — Your mic is muted';
+      }
+    }
+
+    // Word reminder (non-spy only)
+    const chip = document.getElementById('word-chip');
+    if (chip) {
+      if (State.word) {
+        chip.classList.remove('hidden');
+        document.getElementById('word-chip-text').textContent = State.word;
+      } else {
+        chip.classList.add('hidden');
+      }
+    }
+
+    // Audience row
+    renderAudience(activePlayers);
+
+    // Hide transition overlay
+    document.getElementById('round-transition')?.classList.add('hidden');
+  }
+
+  function renderAudience(activePlayers) {
+    const row = document.getElementById('audience-row');
+    if (!row) return;
+
+    const activePairIds = activePlayers.map(p => p.id);
+    const audience = State.players.filter(p => !activePairIds.includes(p.id));
+
+    row.innerHTML = '';
+    audience.forEach(p => {
+      const chip = document.createElement('div');
+      chip.className = 'audience-chip';
+      const color = getPlayerColor(p.id);
+      chip.innerHTML = `
+        <div class="audience-avatar" style="color:${color}">${avatarLetter(p.username)}</div>
+        <span>${escHtml(p.username)}${p.id === State.myId ? ' (you)' : ''}</span>
+      `;
+      row.appendChild(chip);
+    });
+  }
+
+  function showRoundTransition(msg) {
+    const overlay = document.getElementById('round-transition');
+    const text    = document.getElementById('transition-text');
+    if (overlay) overlay.classList.remove('hidden');
+    if (text)    text.textContent = msg || 'Round ended';
+  }
+
+  // ─── Voting Screen ────────────────────────────────────────────
+
+  function renderVoteGrid(players, onVote) {
+    const grid = document.getElementById('vote-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    players.forEach(p => {
+      if (p.id === State.myId) return; // can't vote for yourself
+
+      const color = getPlayerColor(p.id);
+      const card  = document.createElement('div');
+      card.className = 'vote-candidate';
+      card.dataset.id = p.id;
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', `Vote for ${p.username}`);
+      card.innerHTML = `
+        <div class="vote-candidate-avatar" style="color:${color}">${avatarLetter(p.username)}</div>
+        <div class="vote-candidate-name">${escHtml(p.username)}</div>
+        <div class="vote-candidate-count" id="vc-${p.id}">0 votes</div>
+      `;
+      card.addEventListener('click', () => {
+        if (State.hasVoted) return;
+        // Remove previous selection
+        grid.querySelectorAll('.vote-candidate').forEach(c => c.classList.remove('voted'));
+        card.classList.add('voted');
+        State.hasVoted = true;
+        onVote(p.id);
+        // Disable all after vote
+        grid.querySelectorAll('.vote-candidate').forEach(c => c.classList.add('disabled'));
+      });
+      grid.appendChild(card);
+    });
+
+    document.getElementById('votes-total').textContent = players.length - 1;
+  }
+
+  function updateVoteCounts(voteCounts, totalVotes) {
+    Object.entries(voteCounts).forEach(([id, count]) => {
+      const el = document.getElementById(`vc-${id}`);
+      if (el) el.textContent = `${count} vote${count !== 1 ? 's' : ''}`;
+    });
+    document.getElementById('votes-cast').textContent = totalVotes;
+  }
+
+  // ─── Vote Result Screen ───────────────────────────────────────
+
+  function showVoteResult({ mostVotedName, isSpy, spyName, word }) {
+    ScreenManager.show('vote-result');
+
+    const icon     = document.getElementById('vote-result-icon');
+    const headline = document.getElementById('vote-result-headline');
+    const sub      = document.getElementById('vote-result-sub');
+
+    if (isSpy) {
+      icon.textContent     = '🎯';
+      headline.textContent = `${mostVotedName} is the SPY!`;
+      headline.style.color = 'var(--red)';
+      sub.textContent      = `The agents caught the spy. Can ${spyName} guess the secret word?`;
+    } else {
+      icon.textContent     = '😱';
+      headline.textContent = `${mostVotedName} is INNOCENT!`;
+      headline.style.color = 'var(--blue)';
+      sub.textContent      = `The agents voted out an innocent person. The spy wins!`;
+    }
+  }
+
+  function showSpyGuessAwaiting(seconds) {
+    const el        = document.getElementById('spy-guess-awaiting');
+    const countdown = document.getElementById('guess-countdown');
+    if (!el) return;
+    el.classList.remove('hidden');
+
+    let n = seconds;
+    if (countdown) countdown.textContent = ` (${n}s)`;
+    const t = setInterval(() => {
+      n--;
+      if (countdown) countdown.textContent = ` (${Math.max(0, n)}s)`;
+      if (n <= 0) clearInterval(t);
+    }, 1000);
+  }
+
+  // ─── Final Result Screen ──────────────────────────────────────
+
+  function showFinalResult({ winner, spyName, word, spyGuess, correct, reason }) {
+    ScreenManager.show('results');
+
+    const bg       = document.getElementById('result-bg');
+    const trophy   = document.getElementById('result-trophy');
+    const winnerEl = document.getElementById('result-winner');
+    const headline = document.getElementById('result-headline');
+
+    if (winner === 'players') {
+      bg.className = 'result-bg players-win';
+      trophy.textContent   = '🏆';
+      winnerEl.textContent = 'AGENTS WIN';
+      headline.textContent = 'SPY EXPOSED!';
+      headline.className   = 'result-headline players';
+    } else {
+      bg.className = 'result-bg spy-wins';
+      trophy.textContent   = '🕵️';
+      winnerEl.textContent = 'SPY WINS';
+      headline.textContent = 'MISSION FAILED';
+      headline.className   = 'result-headline spy';
+    }
+
+    document.getElementById('result-word').textContent  = word;
+    document.getElementById('result-spy').textContent   = spyName;
+    document.getElementById('result-reason').textContent = reason;
+
+    const guessRow = document.getElementById('result-guess-row');
+    if (spyGuess) {
+      guessRow.classList.remove('hidden');
+      const guessEl = document.getElementById('result-guess');
+      guessEl.textContent = `"${spyGuess}" — ${correct ? '✅ Correct!' : '❌ Wrong'}`;
+      guessEl.style.color = correct ? 'var(--green)' : 'var(--red)';
+    } else {
+      guessRow.classList.add('hidden');
+    }
+  }
+
+  // ─── Utilities ────────────────────────────────────────────────
+
+  function showError(screenId, msg) {
+    const el = document.getElementById(`${screenId}-error`);
+    if (el) {
+      el.textContent = msg;
+      setTimeout(() => { if (el) el.textContent = ''; }, 5000);
+    }
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  return {
+    renderPlayersList, updateStartButton,
+    showRoleReveal,
+    renderRound, renderAudience, showRoundTransition,
+    renderVoteGrid, updateVoteCounts,
+    showVoteResult, showSpyGuessAwaiting,
+    showFinalResult,
+    showError, getPlayerColor, avatarLetter,
+  };
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   SOCKET MANAGER — all server ↔ client events
+════════════════════════════════════════════════════════════════ */
+
+function setupSocketListeners(socket) {
+
+  socket.on('connect', () => {
+    State.myId = socket.id;
+    console.log('[Socket] Connected:', socket.id);
+  });
+
+  socket.on('disconnect', () => {
+    console.warn('[Socket] Disconnected');
+  });
+
+  // ── Room events ──────────────────────────────────────────────
+
+  socket.on('room:created', ({ roomCode, players, isHost }) => {
+    State.roomCode = roomCode;
+    State.isHost   = isHost;
+    State.players  = players;
+
+    document.getElementById('display-roomcode').textContent = roomCode;
+    ScreenManager.show('waiting');
+    UIManager.renderPlayersList(players);
+    UIManager.updateStartButton(players.length);
+
+    // Immediately try to set up mic now that we're in the waiting room
+    setupMicUI();
+  });
+
+  socket.on('room:joined', ({ roomCode, players }) => {
+    State.roomCode = roomCode;
+    State.isHost   = false;
+    State.players  = players;
+
+    document.getElementById('display-roomcode').textContent = roomCode;
+    ScreenManager.show('waiting');
+    UIManager.renderPlayersList(players);
+
+    setupMicUI();
+  });
+
+  socket.on('room:playerJoined', async ({ player, players, newPeerId }) => {
+    State.players = players;
+    UIManager.renderPlayersList(players);
+    UIManager.updateStartButton(players.length);
+
+    // Existing players: initiate WebRTC offer to the new player
+    if (newPeerId && newPeerId !== State.myId) {
+      console.log(`[WebRTC] Opening connection to new player: ${newPeerId}`);
+      await WebRTCManager.connect(newPeerId, true /* initiator */);
+    }
+  });
+
+  socket.on('room:playerLeft', ({ playerId, players, newHostId }) => {
+    State.players = players;
+    UIManager.renderPlayersList(players);
+    UIManager.updateStartButton(players.length);
+
+    // Clean up their peer connection
+    WebRTCManager.closePeer(playerId);
+
+    // Inherit host if we became the new host
+    if (newHostId === State.myId) {
+      State.isHost = true;
+      UIManager.updateStartButton(players.length);
+    }
+  });
+
+  // ── WebRTC signaling relay ────────────────────────────────────
+
+  socket.on('webrtc:offer', async ({ from, offer }) => {
+    console.log(`[WebRTC] Incoming offer from ${from}`);
+    await WebRTCManager.handleOffer(from, offer);
+  });
+
+  socket.on('webrtc:answer', async ({ from, answer }) => {
+    console.log(`[WebRTC] Incoming answer from ${from}`);
+    await WebRTCManager.handleAnswer(from, answer);
+  });
+
+  socket.on('webrtc:ice', async ({ from, candidate }) => {
+    await WebRTCManager.handleIce(from, candidate);
+  });
+
+  // ── Game events ───────────────────────────────────────────────
+
+  socket.on('game:started', ({ role, word, totalRounds, players }) => {
+    State.role        = role;
+    State.word        = word;
+    State.totalRounds = totalRounds;
+    State.players     = players;
+
+    UIManager.showRoleReveal(role, word);
+  });
+
+  socket.on('round:start', (roundData) => {
+    TimerManager.stop();
+    State.currentRound = roundData.roundNumber;
+    State.activePair   = roundData.activePlayers;
+
+    // Update mic: only active pair speaks
+    const activePairIds = roundData.activePlayers.map(p => p.id);
+    WebRTCManager.updateSpeakerStatus(activePairIds);
+
+    ScreenManager.show('game');
+    UIManager.renderRound(roundData);
+
+    // Start countdown timer
+    TimerManager.start(roundData.duration, {
+      numEl : document.getElementById('timer-num'),
+      arcEl : document.getElementById('timer-arc'),
+    });
+  });
+
+  socket.on('round:end', ({ roundNumber }) => {
+    TimerManager.stop();
+    WebRTCManager.updateSpeakerStatus([]); // mute everyone
+    UIManager.showRoundTransition(`Round ${roundNumber} ended`);
+
+    // Reset arc
+    const arc = document.getElementById('timer-arc');
+    if (arc) arc.style.strokeDashoffset = 0;
+  });
+
+  socket.on('vote:start', ({ players, duration }) => {
+    TimerManager.stop();
+    State.hasVoted = false;
+    ScreenManager.show('voting');
+
+    UIManager.renderVoteGrid(players, (votedId) => {
+      socket.emit('vote:cast', { votedId });
+    });
+
+    TimerManager.start(duration, {
+      numEl : document.getElementById('vote-timer-num'),
+    });
+  });
+
+  socket.on('vote:update', ({ voteCounts, totalVotes }) => {
+    UIManager.updateVoteCounts(voteCounts, totalVotes);
+  });
+
+  socket.on('vote:result', (data) => {
+    TimerManager.stop();
+    UIManager.showVoteResult(data);
+
+    if (data.isSpy) {
+      // Show spy-guess panel to the spy
+      if (State.myId === data.spyId) {
+        const panel = document.getElementById('spy-guess-panel');
+        if (panel) panel.classList.remove('hidden');
+      }
+      UIManager.showSpyGuessAwaiting(20);
+    }
+  });
+
+  socket.on('spy:guessChance', ({ spyId }) => {
+    // Spy gets their panel on the vote screen
+    if (State.myId === spyId) {
+      ScreenManager.show('voting');
+      const panel = document.getElementById('spy-guess-panel');
+      if (panel) panel.classList.remove('hidden');
+      const grid = document.getElementById('vote-grid');
+      if (grid) grid.style.pointerEvents = 'none';
+
+      // Countdown for guess
+      let n = 20;
+      const cdEl = document.getElementById('spy-guess-countdown');
+      if (cdEl) cdEl.textContent = `${n}s remaining`;
+      const t = setInterval(() => {
+        n--;
+        if (cdEl) cdEl.textContent = `${Math.max(0,n)}s remaining`;
+        if (n <= 0) clearInterval(t);
+      }, 1000);
+    }
+  });
+
+  socket.on('game:result', (data) => {
+    TimerManager.stop();
+    WebRTCManager.closeAll();
+    UIManager.showFinalResult(data);
+  });
+
+  socket.on('game:aborted', ({ reason }) => {
+    TimerManager.stop();
+    WebRTCManager.closeAll();
+    alert(`Game ended: ${reason}`);
+    location.reload();
+  });
+
+  socket.on('error', ({ message }) => {
+    // Show errors on relevant screens
+    const activeScreen = document.querySelector('.screen.active');
+    const screenId     = activeScreen?.id?.replace('screen-', '') || 'lobby';
+    UIManager.showError(screenId, message);
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MIC SETUP — request mic and set up WebRTC after mic granted
+════════════════════════════════════════════════════════════════ */
+
+async function setupMicUI() {
+  const prompt    = document.getElementById('mic-prompt');
+  const statusEl  = document.getElementById('mic-status');
+  const micBtn    = document.getElementById('btn-mic-permission');
+
+  if (!prompt) return;
+
+  // Check if already granted
+  const permission = await navigator.permissions?.query({ name: 'microphone' }).catch(() => null);
+  if (permission?.state === 'granted') {
+    await _acquireMic(statusEl, prompt);
+    return;
+  }
+
+  prompt.classList.remove('hidden');
+  if (micBtn) {
+    micBtn.addEventListener('click', async () => {
+      micBtn.disabled = true;
+      micBtn.textContent = 'Requesting…';
+      await _acquireMic(statusEl, prompt);
+    });
+  }
+}
+
+async function _acquireMic(statusEl, promptEl) {
+  const granted = await WebRTCManager.requestMic();
+  if (granted) {
+    if (statusEl) statusEl.textContent = '✓ Microphone ready';
+    if (promptEl) {
+      setTimeout(() => promptEl.classList.add('hidden'), 1500);
+    }
+    console.log('[Mic] Access granted');
+  } else {
+    if (statusEl) {
+      statusEl.style.color = 'var(--red)';
+      statusEl.textContent = '✗ Mic access denied. Voice features will not work.';
+    }
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   UI LISTENERS — button clicks
+════════════════════════════════════════════════════════════════ */
+
+function setupUIListeners() {
+  const socket = State.socket;
+
+  // ── Lobby ──────────────────────────────────────────────────────
+
+  document.getElementById('btn-create').addEventListener('click', () => {
+    const username = document.getElementById('username-input').value.trim();
+    if (!username) return UIManager.showError('lobby', 'Please enter a codename.');
+    socket.emit('room:create', { username });
+    State.myUsername = username;
+  });
+
+  document.getElementById('btn-join').addEventListener('click', () => {
+    const username = document.getElementById('username-input').value.trim();
+    const code     = document.getElementById('roomcode-input').value.trim();
+    if (!username) return UIManager.showError('lobby', 'Please enter a codename.');
+    if (!code)     return UIManager.showError('lobby', 'Please enter a room code.');
+    socket.emit('room:join', { roomCode: code, username });
+    State.myUsername = username;
+  });
+
+  // Allow Enter key in lobby inputs
+  ['username-input', 'roomcode-input'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const code = document.getElementById('roomcode-input').value.trim();
+        if (code) document.getElementById('btn-join').click();
+        else document.getElementById('btn-create').click();
+      }
+    });
+  });
+
+  // ── Waiting Room ───────────────────────────────────────────────
+
+  document.getElementById('btn-start')?.addEventListener('click', () => {
+    socket.emit('game:start');
+  });
+
+  document.getElementById('btn-copy-code')?.addEventListener('click', () => {
+    const code = document.getElementById('display-roomcode').textContent;
+    navigator.clipboard?.writeText(code).then(() => {
+      const btn = document.getElementById('btn-copy-code');
+      if (btn) { btn.textContent = '✓'; setTimeout(() => btn.textContent = '⎘', 1500); }
+    });
+  });
+
+  // ── Voting — spy guess ──────────────────────────────────────────
+
+  document.getElementById('btn-spy-guess')?.addEventListener('click', () => {
+    const input = document.getElementById('spy-guess-input');
+    const word  = input?.value.trim();
+    if (!word) return;
+    socket.emit('spy:guess', { word });
+    document.getElementById('btn-spy-guess').disabled = true;
+    input.disabled = true;
+  });
+
+  document.getElementById('spy-guess-input')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-spy-guess')?.click();
+  });
+
+  // ── Play Again ──────────────────────────────────────────────────
+
+  document.getElementById('btn-play-again')?.addEventListener('click', () => {
+    WebRTCManager.closeAll();
+    location.reload();
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BOOT
+════════════════════════════════════════════════════════════════ */
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Connect to Socket.IO server
+  const socket  = io();
+  State.socket  = socket;
+
+  setupSocketListeners(socket);
+  setupUIListeners();
+
+  console.log('%c🕵️  SPY GAME — Voice Edition', 'font-size:18px; font-weight:bold; color:#d4a017;');
+  console.log('%cClient ready. Waiting for connection…', 'color:#90a4be;');
+});
+</script>
+</body>
+</html>
