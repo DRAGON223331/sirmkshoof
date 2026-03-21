@@ -1,327 +1,345 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>SerMakshouf — Voice Spy Game</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+  <title>سر مكشوف — لعبة الجواسيس</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Barlow:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet"/>
   <style>
-/* ═══════════════════════════════════════════════════════════════════
-   SerMakshouf — Stylesheet · Dark Ops Theme
-════════════════════════════════════════════════════════════════════ */
-:root {
-  --bg-void   : #02050d;
-  --bg-card   : #0b1628;
-  --bg-input  : #0f1e35;
-  --bg-lift   : #142038;
-  --border    : rgba(255,255,255,0.07);
-  --border-hi : rgba(255,255,255,0.14);
-  --gold      : #d4a017;
-  --gold-dim  : #9e7910;
-  --gold-glow : rgba(212,160,23,0.25);
-  --blue      : #3ab7e8;
-  --blue-dim  : #1a6fa0;
-  --blue-glow : rgba(58,183,232,0.2);
-  --red       : #e63946;
-  --red-glow  : rgba(230,57,70,0.2);
-  --green     : #2dc78a;
-  --text-hi   : #eef2f8;
-  --text-mid  : #90a4be;
-  --text-lo   : #4a6280;
-  --r         : 10px;
-  --rs        : 6px;
-  --rl        : 18px;
-  --fd        : 'Bebas Neue', sans-serif;
-  --fm        : 'Space Mono', monospace;
-  --fb        : 'Barlow', sans-serif;
-  --circ      : 163.36px;
+/* ══════════════════════════════════════
+   سر مكشوف — Dark Ops Theme
+══════════════════════════════════════ */
+:root{
+  --void:#02050d; --card:#0b1628; --inp:#0f1e35; --lift:#142038;
+  --br:rgba(255,255,255,.07); --brh:rgba(255,255,255,.14);
+  --gold:#d4a017; --gdim:#9e7910; --gglow:rgba(212,160,23,.25);
+  --blue:#3ab7e8; --bdim:#1a6fa0; --bglow:rgba(58,183,232,.2);
+  --red:#e63946; --rglow:rgba(230,57,70,.2);
+  --green:#2dc78a;
+  --hi:#eef2f8; --mid:#90a4be; --lo:#4a6280;
+  --r:10px; --rs:6px; --rl:18px;
+  --fd:'Bebas Neue',sans-serif;
+  --fm:'Space Mono',monospace;
+  --fb:'Barlow',sans-serif;
+  --fa:'Cairo',sans-serif;
+  --circ:163.36px;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;}
-body{background:var(--bg-void);color:var(--text-hi);font-family:var(--fb);font-size:16px;line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
-
-/* Scanlines */
-.scanlines{position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.08) 3px,rgba(0,0,0,.08) 4px);animation:scan 8s linear infinite;}
-@keyframes scan{from{transform:translateY(0)}to{transform:translateY(4px)}}
-
-/* Connection dot */
-#cdot{position:fixed;top:12px;right:14px;z-index:1000;width:8px;height:8px;border-radius:50%;background:#444;transition:background .4s;}
-#cdot.on{background:var(--green);}#cdot.off{background:var(--red);}
-
-/* App container */
-#app{position:relative;min-height:100vh;width:100%;max-width:600px;margin:0 auto;}
-
-/* Screens */
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;padding:0 20px 32px;opacity:0;transform:translateY(24px);pointer-events:none;transition:opacity .35s,transform .35s;overflow-y:auto;min-height:100vh;}
-.screen.active{opacity:1;transform:none;pointer-events:auto;position:relative;}
-
-/* Card */
-.card{background:var(--bg-card);border:1px solid var(--border-hi);border-radius:var(--rl);padding:28px 24px;}
-
-/* Fields */
-.cf{margin-bottom:14px;}
-.fl{display:block;font-family:var(--fm);font-size:10px;letter-spacing:.14em;color:var(--text-lo);margin-bottom:6px;}
-.fi{width:100%;background:var(--bg-input);border:1px solid var(--border-hi);border-radius:var(--rs);color:var(--text-hi);font-family:var(--fm);font-size:15px;padding:11px 14px;outline:none;transition:border-color .2s,box-shadow .2s;}
-.fi:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow);}
-.fi::placeholder{color:var(--text-lo);}
-.fi-code{text-transform:uppercase;letter-spacing:.18em;font-size:22px;text-align:center;}
-
-/* Buttons */
-.btn{display:block;width:100%;padding:13px 20px;border:none;border-radius:var(--rs);font-family:var(--fm);font-size:13px;font-weight:700;letter-spacing:.08em;cursor:pointer;transition:opacity .15s,transform .1s,box-shadow .2s;text-transform:uppercase;}
-.btn:active{transform:scale(.97);}
-.btn:disabled{opacity:.4;cursor:not-allowed;}
-.btn-p{background:var(--gold);color:#000;box-shadow:0 4px 18px var(--gold-glow);}
-.btn-p:hover:not(:disabled){box-shadow:0 6px 28px var(--gold-glow);opacity:.92;}
-.btn-s{background:transparent;color:var(--blue);border:1px solid var(--blue-dim);box-shadow:0 2px 10px var(--blue-glow);}
-.btn-s:hover:not(:disabled){background:rgba(58,183,232,.06);}
-.btn-d{background:var(--red);color:#fff;box-shadow:0 4px 18px var(--red-glow);}
-.btn-sm{padding:9px 16px;font-size:11px;}
-
-/* Divider */
-.div{position:relative;text-align:center;margin:18px 0;font-family:var(--fm);font-size:10px;letter-spacing:.12em;color:var(--text-lo);}
-.div::before,.div::after{content:'';position:absolute;top:50%;width:38%;height:1px;background:var(--border-hi);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px;line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.07) 3px,rgba(0,0,0,.07) 4px);animation:scan 10s linear infinite}
+@keyframes scan{0%{background-position:0 0}100%{background-position:0 4px}}
+#cdot{position:fixed;top:12px;right:14px;z-index:1000;width:8px;height:8px;border-radius:50%;background:#333;transition:background .4s}
+#cdot.on{background:var(--green)}#cdot.off{background:var(--red)}
+#app{position:relative;min-height:100vh;width:100%;max-width:620px;margin:0 auto}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;padding:0 20px 32px;opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity .3s,transform .3s;overflow-y:auto;min-height:100vh}
+.screen.active{opacity:1;transform:none;pointer-events:auto;position:relative}
+.card{background:var(--card);border:1px solid var(--brh);border-radius:var(--rl);padding:28px 24px}
+.cf{margin-bottom:14px}
+.fl{display:block;font-family:var(--fm);font-size:10px;letter-spacing:.14em;color:var(--lo);margin-bottom:6px}
+.fi{width:100%;background:var(--inp);border:1px solid var(--brh);border-radius:var(--rs);color:var(--hi);font-family:var(--fm);font-size:15px;padding:11px 14px;outline:none;transition:border-color .2s,box-shadow .2s}
+.fi:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gglow)}
+.fi::placeholder{color:var(--lo)}
+.fi-code{text-transform:uppercase;letter-spacing:.18em;font-size:22px;text-align:center}
+.btn{display:block;width:100%;padding:13px 20px;border:none;border-radius:var(--rs);font-family:var(--fm);font-size:13px;font-weight:700;letter-spacing:.08em;cursor:pointer;transition:opacity .15s,transform .1s,box-shadow .2s;text-transform:uppercase}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-p{background:var(--gold);color:#000;box-shadow:0 4px 18px var(--gglow)}
+.btn-p:hover:not(:disabled){opacity:.9;box-shadow:0 6px 28px var(--gglow)}
+.btn-s{background:transparent;color:var(--blue);border:1px solid var(--bdim);box-shadow:0 2px 10px var(--bglow)}
+.btn-s:hover:not(:disabled){background:rgba(58,183,232,.06)}
+.btn-d{background:var(--red);color:#fff;box-shadow:0 4px 18px var(--rglow)}
+.btn-sm{padding:9px 16px;font-size:11px}
+.div{position:relative;text-align:center;margin:18px 0;font-family:var(--fm);font-size:10px;letter-spacing:.12em;color:var(--lo)}
+.div::before,.div::after{content:'';position:absolute;top:50%;width:38%;height:1px;background:var(--brh)}
 .div::before{left:0}.div::after{right:0}
-
-/* Error */
-.err{color:var(--red);font-family:var(--fm);font-size:11px;min-height:18px;margin-top:10px;text-align:center;}
-
-.hidden{display:none!important;}
+.err{color:var(--red);font-family:var(--fm);font-size:11px;min-height:18px;margin-top:10px;text-align:center}
+.hidden{display:none!important}
 ::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:2px}
+::-webkit-scrollbar-thumb{background:var(--brh);border-radius:2px}
+
+/* ══ SETUP SCREEN ══ */
+.setup-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;min-height:100vh;gap:20px;padding:40px 0;text-align:center}
+.setup-icon{font-size:56px}
+.setup-title{font-family:var(--fd);font-size:36px;letter-spacing:.06em;color:var(--gold)}
+.setup-msg{font-size:14px;color:var(--mid);max-width:380px;line-height:1.7;direction:rtl;font-family:var(--fa)}
+.setup-steps{background:var(--card);border:1px solid var(--brh);border-radius:var(--rl);padding:20px 24px;width:100%;text-align:left}
+.setup-steps-title{font-family:var(--fm);font-size:10px;letter-spacing:.16em;color:var(--lo);margin-bottom:12px}
+.setup-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;font-size:13px;color:var(--mid)}
+.setup-step:last-child{margin-bottom:0}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--lift);border:1px solid var(--brh);display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:10px;font-weight:700;color:var(--gold);flex-shrink:0;margin-top:1px}
+.step-code{font-family:var(--fm);font-size:11px;background:var(--lift);border:1px solid var(--brh);border-radius:4px;padding:2px 6px;color:var(--gold)}
+.setup-url-row{display:flex;gap:8px;margin-top:4px}
+.setup-url-row .fi{font-size:12px;padding:9px 12px}
+.setup-url-row .btn{width:auto;flex-shrink:0;padding:9px 16px;font-size:11px}
 
 /* ══ LOBBY ══ */
-.lbg{position:fixed;inset:0;background-image:linear-gradient(rgba(212,160,23,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(212,160,23,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
-.ll{padding:56px 0 36px;text-align:center;}
-.le{font-family:var(--fm);font-size:9px;letter-spacing:.28em;color:var(--gold-dim);margin-bottom:6px;}
-.lt{font-family:var(--fd);font-size:clamp(44px,12vw,78px);line-height:.9;letter-spacing:.02em;color:var(--gold);text-shadow:0 0 40px var(--gold-glow),0 0 80px var(--gold-glow);}
-.la{font-family:var(--fm);font-size:12px;letter-spacing:.04em;color:var(--gold-dim);margin-top:6px;direction:rtl;}
-.ls{font-family:var(--fm);font-size:10px;letter-spacing:.18em;color:var(--text-lo);margin-top:6px;}
-.lf{text-align:center;font-family:var(--fm);font-size:9px;letter-spacing:.1em;color:var(--text-lo);padding:24px 0 12px;}
+.lbg{position:fixed;inset:0;background-image:linear-gradient(rgba(212,160,23,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(212,160,23,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.ll{padding:56px 0 36px;text-align:center}
+.le{font-family:var(--fm);font-size:9px;letter-spacing:.28em;color:var(--gdim);margin-bottom:6px}
+.lt{font-family:var(--fa);font-size:clamp(40px,11vw,72px);font-weight:700;line-height:1;color:var(--gold);text-shadow:0 0 40px var(--gglow),0 0 80px var(--gglow);direction:rtl}
+.ls{font-family:var(--fm);font-size:10px;letter-spacing:.15em;color:var(--lo);margin-top:8px}
+.lf{text-align:center;font-family:var(--fm);font-size:9px;letter-spacing:.1em;color:var(--lo);padding:24px 0 12px}
 
 /* ══ WAITING ══ */
-.wh{padding:36px 0 20px;display:flex;justify-content:center;}
-.rc{display:flex;align-items:center;gap:12px;background:var(--bg-card);border:1px solid var(--border-hi);border-radius:var(--r);padding:10px 20px;}
-.rl{font-family:var(--fm);font-size:9px;letter-spacing:.18em;color:var(--text-lo);}
-.rv{font-family:var(--fm);font-size:26px;font-weight:700;letter-spacing:.18em;color:var(--gold);}
-.cb{background:none;border:1px solid var(--border-hi);color:var(--text-mid);border-radius:4px;padding:4px 8px;font-size:14px;cursor:pointer;transition:all .15s;}
-.cb:hover{border-color:var(--gold);color:var(--gold);}
-.wb{flex:1;display:flex;flex-direction:column;gap:16px;}
-.st{font-family:var(--fm);font-size:10px;letter-spacing:.18em;color:var(--text-lo);display:flex;align-items:center;gap:10px;}
-.pc{background:var(--bg-lift);border:1px solid var(--border-hi);border-radius:20px;padding:2px 8px;font-size:10px;color:var(--text-mid);}
-.pl{list-style:none;display:flex;flex-direction:column;gap:8px;}
-.pi{display:flex;align-items:center;gap:12px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rs);padding:11px 14px;animation:sli .25s ease;}
+.wh{padding:36px 0 20px;display:flex;justify-content:center}
+.rc{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--brh);border-radius:var(--r);padding:10px 20px}
+.rcl{font-family:var(--fm);font-size:9px;letter-spacing:.18em;color:var(--lo)}
+.rcv{font-family:var(--fm);font-size:26px;font-weight:700;letter-spacing:.18em;color:var(--gold)}
+.cb{background:none;border:1px solid var(--brh);color:var(--mid);border-radius:4px;padding:4px 8px;font-size:14px;cursor:pointer;transition:all .15s}
+.cb:hover{border-color:var(--gold);color:var(--gold)}
+.wb{flex:1;display:flex;flex-direction:column;gap:16px}
+.st{font-family:var(--fm);font-size:10px;letter-spacing:.18em;color:var(--lo);display:flex;align-items:center;gap:10px}
+.pc{background:var(--lift);border:1px solid var(--brh);border-radius:20px;padding:2px 8px;font-size:10px;color:var(--mid)}
+.pl{list-style:none;display:flex;flex-direction:column;gap:8px}
+.pi{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--br);border-radius:var(--rs);padding:11px 14px;animation:sli .25s ease}
 @keyframes sli{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
-.pa{width:32px;height:32px;border-radius:50%;background:var(--bg-lift);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:16px;flex-shrink:0;}
-.pn{font-size:15px;font-weight:500;flex:1;}
-.hb{font-family:var(--fm);font-size:8px;letter-spacing:.1em;color:var(--gold);background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.2);border-radius:20px;padding:2px 8px;}
-.yb{font-family:var(--fm);font-size:8px;letter-spacing:.1em;color:var(--blue);background:rgba(58,183,232,.1);border:1px solid rgba(58,183,232,.2);border-radius:20px;padding:2px 8px;}
-.whi{font-size:13px;color:var(--text-lo);text-align:center;font-family:var(--fm);}
-.mp{background:var(--bg-card);border:1px solid var(--border-hi);border-radius:var(--r);padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
-.mpi{font-size:32px;}
-.mpt{font-size:14px;color:var(--text-mid);}
-.ms{font-family:var(--fm);font-size:11px;color:var(--green);}
-.sh{font-size:10px;font-family:var(--fm);color:var(--text-lo);letter-spacing:.08em;text-align:center;}
+.pa{width:32px;height:32px;border-radius:50%;background:var(--lift);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:16px;flex-shrink:0}
+.pn{font-size:15px;font-weight:500;flex:1}
+.hb{font-family:var(--fm);font-size:8px;letter-spacing:.1em;color:var(--gold);background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.2);border-radius:20px;padding:2px 8px}
+.yb{font-family:var(--fm);font-size:8px;letter-spacing:.1em;color:var(--blue);background:rgba(58,183,232,.1);border:1px solid rgba(58,183,232,.2);border-radius:20px;padding:2px 8px}
+.whi{font-size:13px;color:var(--lo);text-align:center;font-family:var(--fm)}
+.mp{background:var(--card);border:1px solid var(--brh);border-radius:var(--r);padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.mpi{font-size:32px}.mpt{font-size:14px;color:var(--mid)}.ms{font-family:var(--fm);font-size:11px}
+.sh{font-size:10px;font-family:var(--fm);color:var(--lo);letter-spacing:.08em;text-align:center}
 
 /* ══ ROLE ══ */
-.rw{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;min-height:100vh;gap:24px;padding:40px 0;}
-.rcard{width:100%;max-width:320px;background:var(--bg-card);border:1px solid var(--border-hi);border-radius:var(--rl);overflow:hidden;animation:crev .6s cubic-bezier(.34,1.56,.64,1) both;}
+.rw{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;min-height:100vh;gap:24px;padding:40px 0}
+.rcard{width:100%;max-width:320px;background:var(--card);border:1px solid var(--brh);border-radius:var(--rl);overflow:hidden;animation:crev .6s cubic-bezier(.34,1.56,.64,1) both}
 @keyframes crev{from{opacity:0;transform:scale(.8) rotateX(20deg)}to{opacity:1;transform:none}}
-.rcard.rs{border-color:rgba(230,57,70,.4);box-shadow:0 0 40px rgba(230,57,70,.15);}
-.rcard.rp{border-color:rgba(58,183,232,.4);box-shadow:0 0 40px rgba(58,183,232,.15);}
-.rct{padding:32px 24px 24px;text-align:center;border-bottom:1px solid var(--border);}
-.rcl{font-family:var(--fm);font-size:9px;letter-spacing:.24em;color:var(--text-lo);margin-bottom:12px;}
-.rci{font-size:52px;margin-bottom:12px;}
-.rcn{font-family:var(--fd);font-size:42px;letter-spacing:.06em;}
-.rcard.rs .rcn{color:var(--red)}.rcard.rp .rcn{color:var(--blue);}
-.rws{padding:20px 24px;text-align:center;}
-.rwl{font-family:var(--fm);font-size:9px;letter-spacing:.18em;color:var(--text-lo);margin-bottom:8px;}
-.rwv{font-family:var(--fd);font-size:34px;letter-spacing:.06em;color:var(--gold);}
-.rss{padding:20px 24px;text-align:center;}
-.rsm{font-size:14px;color:var(--text-mid);line-height:1.6;}
-.rcm{font-family:var(--fm);font-size:11px;color:var(--text-lo);letter-spacing:.1em;}
+.rcard.rs{border-color:rgba(230,57,70,.4);box-shadow:0 0 40px rgba(230,57,70,.15)}
+.rcard.rp{border-color:rgba(58,183,232,.4);box-shadow:0 0 40px rgba(58,183,232,.15)}
+.rct{padding:32px 24px 24px;text-align:center;border-bottom:1px solid var(--br)}
+.rcl{font-family:var(--fm);font-size:9px;letter-spacing:.24em;color:var(--lo);margin-bottom:12px}
+.rci{font-size:52px;margin-bottom:12px}
+.rcn{font-family:var(--fd);font-size:42px;letter-spacing:.06em}
+.rcard.rs .rcn{color:var(--red)}.rcard.rp .rcn{color:var(--blue)}
+.rws{padding:20px 24px;text-align:center}
+.rwl{font-family:var(--fm);font-size:9px;letter-spacing:.18em;color:var(--lo);margin-bottom:8px}
+.rwv{font-family:var(--fd);font-size:34px;letter-spacing:.06em;color:var(--gold)}
+.rss{padding:20px 24px;text-align:center}
+.rsm{font-size:14px;color:var(--mid);line-height:1.7;font-family:var(--fa);direction:rtl}
+.rcm{font-family:var(--fm);font-size:11px;color:var(--lo);letter-spacing:.1em}
 
 /* ══ GAME ══ */
-.gt{display:flex;align-items:center;justify-content:space-between;padding:16px 0 8px;gap:12px;}
-.rb{font-family:var(--fm);font-size:11px;letter-spacing:.12em;color:var(--text-lo);background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:5px 12px;white-space:nowrap;}
-.tw{display:flex;align-items:center;justify-content:center;}
-.tr{position:relative;width:60px;height:60px;}
-.ts{width:100%;height:100%;transform:rotate(-90deg);}
-.tbg{fill:none;stroke:var(--bg-lift);stroke-width:4;}
-.ta{fill:none;stroke:var(--gold);stroke-width:4;stroke-linecap:round;stroke-dasharray:var(--circ);stroke-dashoffset:0;transition:stroke-dashoffset 1s linear,stroke .5s;}
-.ta.urg{stroke:var(--red);}
-.tn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:17px;font-weight:700;color:var(--gold);transition:color .5s;}
-.tn.urg{color:var(--red);}
-.wc{font-family:var(--fm);font-size:11px;color:var(--gold);background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.2);border-radius:20px;padding:5px 12px;white-space:nowrap;}
-.stage{display:flex;align-items:center;justify-content:center;padding:24px 0 20px;position:relative;}
-.stage::before{content:'';position:absolute;bottom:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--border-hi),transparent);}
-.ch{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;padding:0 8px;}
-.car{position:relative;width:80px;height:80px;}
-.cav{width:80px;height:80px;border-radius:50%;background:var(--bg-lift);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:36px;color:var(--text-hi);border:2px solid var(--border-hi);position:relative;z-index:1;}
-.ch.spk .cav{border-color:var(--gold);box-shadow:0 0 0 4px var(--gold-glow);}
-.pr{position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--gold);opacity:0;pointer-events:none;}
-.ch.spk .pr{animation:pulse 1.4s ease-out infinite;}
+.gt{display:flex;align-items:center;justify-content:space-between;padding:16px 0 8px;gap:12px}
+.rb{font-family:var(--fm);font-size:11px;letter-spacing:.12em;color:var(--lo);background:var(--card);border:1px solid var(--br);border-radius:20px;padding:5px 12px;white-space:nowrap}
+.tw{display:flex;align-items:center;justify-content:center}
+.tr{position:relative;width:60px;height:60px}
+.ts{width:100%;height:100%;transform:rotate(-90deg)}
+.tbg{fill:none;stroke:var(--lift);stroke-width:4}
+.ta{fill:none;stroke:var(--gold);stroke-width:4;stroke-linecap:round;stroke-dasharray:var(--circ);stroke-dashoffset:0;transition:stroke-dashoffset 1s linear,stroke .5s}
+.ta.urg{stroke:var(--red)}
+.tn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:17px;font-weight:700;color:var(--gold);transition:color .5s}
+.tn.urg{color:var(--red)}
+.wc{font-family:var(--fm);font-size:11px;color:var(--gold);background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.2);border-radius:20px;padding:5px 12px;white-space:nowrap}
+.stage{display:flex;align-items:center;justify-content:center;padding:24px 0 20px;position:relative}
+.stage::before{content:'';position:absolute;bottom:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--brh),transparent)}
+.ch{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;padding:0 8px}
+.car{position:relative;width:80px;height:80px}
+.cav{width:80px;height:80px;border-radius:50%;background:var(--lift);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:36px;border:2px solid var(--brh);position:relative;z-index:1}
+.ch.spk .cav{border-color:var(--gold);box-shadow:0 0 0 4px var(--gglow)}
+.pr{position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--gold);opacity:0;pointer-events:none}
+.ch.spk .pr{animation:pulse 1.4s ease-out infinite}
 @keyframes pulse{0%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(1.45)}}
-.cn{font-size:14px;font-weight:600;text-align:center;color:var(--text-hi);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.ci{font-family:var(--fm);font-size:9px;letter-spacing:.12em;color:var(--text-lo);height:16px;}
-.ch.spk .ci{color:var(--gold);font-weight:700;}
-.sc{display:flex;flex-direction:column;align-items:center;gap:4px;padding:0 12px;flex-shrink:0;}
-.lb{background:var(--red);color:#fff;font-family:var(--fm);font-size:9px;font-weight:700;letter-spacing:.14em;border-radius:3px;padding:2px 6px;animation:lp 2s ease-in-out infinite;}
+.cn{font-size:14px;font-weight:600;text-align:center;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ci{font-family:var(--fm);font-size:9px;letter-spacing:.12em;color:var(--lo);height:16px}
+.ch.spk .ci{color:var(--gold);font-weight:700}
+.sc{display:flex;flex-direction:column;align-items:center;gap:4px;padding:0 12px;flex-shrink:0}
+.lb{background:var(--red);color:#fff;font-family:var(--fm);font-size:9px;font-weight:700;letter-spacing:.14em;border-radius:3px;padding:2px 6px;animation:lp 2s ease-in-out infinite}
 @keyframes lp{0%,100%{opacity:1}50%{opacity:.5}}
-.mi{font-size:22px;}
-.sb{text-align:center;font-family:var(--fm);font-size:12px;letter-spacing:.12em;padding:10px 16px;border-radius:var(--rs);margin:4px 0 16px;min-height:40px;display:flex;align-items:center;justify-content:center;}
-.sb.spk{background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.25);color:var(--gold);}
-.sb.lst{background:var(--bg-card);border:1px solid var(--border);color:var(--text-lo);}
-.asc{padding-top:4px;}
-.asl{font-family:var(--fm);font-size:9px;letter-spacing:.18em;color:var(--text-lo);margin-bottom:10px;}
-.asr{display:flex;flex-wrap:wrap;gap:8px;}
-.ac{display:flex;align-items:center;gap:7px;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:5px 12px 5px 5px;font-size:13px;}
-.aa{width:24px;height:24px;border-radius:50%;background:var(--bg-lift);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:12px;color:var(--text-mid);}
-.rt{position:absolute;inset:0;background:rgba(2,5,13,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:10;backdrop-filter:blur(4px);}
-.rtt{font-family:var(--fd);font-size:36px;letter-spacing:.06em;color:var(--text-hi);}
-.rts{font-family:var(--fm);font-size:11px;letter-spacing:.14em;color:var(--text-lo);}
+.mi{font-size:22px}
+.sb{text-align:center;font-family:var(--fm);font-size:12px;letter-spacing:.1em;padding:10px 16px;border-radius:var(--rs);margin:4px 0 16px;min-height:40px;display:flex;align-items:center;justify-content:center}
+.sb.spk{background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.25);color:var(--gold)}
+.sb.lst{background:var(--card);border:1px solid var(--br);color:var(--lo)}
+.asc{padding-top:4px}
+.asl{font-family:var(--fm);font-size:9px;letter-spacing:.18em;color:var(--lo);margin-bottom:10px}
+.asr{display:flex;flex-wrap:wrap;gap:8px}
+.ac{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--br);border-radius:20px;padding:5px 12px 5px 5px;font-size:13px}
+.aa{width:24px;height:24px;border-radius:50%;background:var(--lift);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:12px;color:var(--mid)}
+.rt{position:absolute;inset:0;background:rgba(2,5,13,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:10;backdrop-filter:blur(4px)}
+.rtt{font-family:var(--fd);font-size:36px;letter-spacing:.06em}
+.rts{font-family:var(--fm);font-size:11px;letter-spacing:.14em;color:var(--lo)}
 
 /* ══ VOTING ══ */
-.vh{padding:36px 0 12px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
-.vt{font-family:var(--fd);font-size:38px;letter-spacing:.06em;color:var(--text-hi);line-height:1;}
-.vtw{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--fm);font-size:9px;letter-spacing:.12em;color:var(--text-lo);}
-.vtn{font-size:28px;font-weight:700;color:var(--text-hi);line-height:1.1;}
-.vs{font-size:13px;color:var(--text-mid);margin-bottom:20px;}
-.vg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-.vc{background:var(--bg-card);border:2px solid var(--border);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:border-color .2s,transform .1s,box-shadow .2s;}
-.vc:hover:not(.dis){border-color:var(--border-hi);transform:translateY(-2px);}
-.vc.sel{border-color:var(--red);box-shadow:0 0 16px var(--red-glow);}
-.vc.dis{cursor:not-allowed;opacity:.55;}
-.vca{width:52px;height:52px;border-radius:50%;background:var(--bg-lift);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:26px;color:var(--text-hi);}
-.vcn{font-size:14px;font-weight:600;text-align:center;}
-.vcc{font-family:var(--fm);font-size:11px;color:var(--text-lo);}
-.vc.sel .vcc{color:var(--red);}
-.vp{text-align:center;font-family:var(--fm);font-size:11px;letter-spacing:.08em;color:var(--text-lo);margin-bottom:16px;}
-.sgp{background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.25);border-radius:var(--r);padding:20px;margin-top:12px;animation:sli .3s ease;}
-.sgt{font-family:var(--fm);font-size:12px;letter-spacing:.06em;color:var(--red);margin-bottom:12px;}
-.sgf{display:flex;gap:8px;margin-bottom:8px;}
-.sgf .fi{flex:1}
-.sgf .btn{width:auto;flex-shrink:0;padding:11px 16px;}
-.sgc{font-family:var(--fm);font-size:10px;color:var(--text-lo);}
+.vh{padding:36px 0 12px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.vt{font-family:var(--fd);font-size:38px;letter-spacing:.06em;line-height:1}
+.vtw{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--fm);font-size:9px;letter-spacing:.12em;color:var(--lo)}
+.vtn{font-size:28px;font-weight:700;line-height:1.1}
+.vs{font-size:13px;color:var(--mid);margin-bottom:20px;direction:rtl;font-family:var(--fa)}
+.vg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.vc{background:var(--card);border:2px solid var(--br);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:border-color .2s,transform .1s,box-shadow .2s}
+.vc:hover:not(.dis){border-color:var(--brh);transform:translateY(-2px)}
+.vc.sel{border-color:var(--red);box-shadow:0 0 16px var(--rglow)}
+.vc.dis{cursor:not-allowed;opacity:.55}
+.vca{width:52px;height:52px;border-radius:50%;background:var(--lift);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:26px}
+.vcn{font-size:14px;font-weight:600;text-align:center}
+.vcc{font-family:var(--fm);font-size:11px;color:var(--lo)}
+.vc.sel .vcc{color:var(--red)}
+.vp{text-align:center;font-family:var(--fm);font-size:11px;letter-spacing:.08em;color:var(--lo);margin-bottom:16px}
+.sgp{background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.25);border-radius:var(--r);padding:20px;margin-top:12px;animation:sli .3s ease}
+.sgt{font-family:var(--fa);font-size:14px;color:var(--red);margin-bottom:12px;direction:rtl}
+.sgf{display:flex;gap:8px;margin-bottom:8px}
+.sgf .fi{flex:1}.sgf .btn{width:auto;flex-shrink:0;padding:11px 16px}
+.sgc{font-family:var(--fm);font-size:10px;color:var(--lo)}
 
 /* ══ VOTE RESULT ══ */
-.vrw{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;min-height:100vh;gap:16px;padding:40px 0;text-align:center;}
-.vri{font-size:72px;animation:bi .5s cubic-bezier(.34,1.56,.64,1);}
+.vrw{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;min-height:100vh;gap:16px;padding:40px 0;text-align:center}
+.vri{font-size:72px;animation:bi .5s cubic-bezier(.34,1.56,.64,1)}
 @keyframes bi{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-.vrh{font-family:var(--fd);font-size:36px;letter-spacing:.04em;line-height:1.1;}
-.vrs{font-size:15px;color:var(--text-mid);max-width:280px;}
-.sga{display:flex;align-items:center;gap:8px;font-family:var(--fm);font-size:11px;color:var(--text-lo);background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:8px 16px;margin-top:8px;}
-.pd{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:dp 1s ease-in-out infinite;}
+.vrh{font-family:var(--fd);font-size:36px;letter-spacing:.04em;line-height:1.1}
+.vrs{font-size:15px;color:var(--mid);max-width:280px;direction:rtl;font-family:var(--fa)}
+.sga{display:flex;align-items:center;gap:8px;font-family:var(--fm);font-size:11px;color:var(--lo);background:var(--card);border:1px solid var(--br);border-radius:20px;padding:8px 16px;margin-top:8px}
+.pd{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:dp 1s ease-in-out infinite}
 @keyframes dp{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:.5}}
 
 /* ══ RESULTS ══ */
-.resbg{position:fixed;inset:0;z-index:-1;opacity:.07;}
-.resbg.pw{background:radial-gradient(ellipse at 50% 30%,var(--blue),transparent 60%);}
-.resbg.sw{background:radial-gradient(ellipse at 50% 30%,var(--red),transparent 60%);}
-.resw{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;min-height:100vh;gap:16px;padding:48px 0 40px;text-align:center;}
-.resty{font-size:72px;animation:ts .7s cubic-bezier(.34,1.56,.64,1);}
+.resbg{position:fixed;inset:0;z-index:-1;opacity:.07}
+.resbg.pw{background:radial-gradient(ellipse at 50% 30%,var(--blue),transparent 60%)}
+.resbg.sw{background:radial-gradient(ellipse at 50% 30%,var(--red),transparent 60%)}
+.resw{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;min-height:100vh;gap:16px;padding:48px 0 40px;text-align:center}
+.resty{font-size:72px;animation:ts .7s cubic-bezier(.34,1.56,.64,1)}
 @keyframes ts{from{transform:rotate(-30deg) scale(0);opacity:0}to{transform:none;opacity:1}}
-.reswin{font-family:var(--fm);font-size:10px;letter-spacing:.24em;color:var(--text-lo);}
-.resh{font-family:var(--fd);font-size:clamp(36px,10vw,52px);letter-spacing:.04em;line-height:1;}
-.resh.p{color:var(--blue)}.resh.s{color:var(--red);}
-.rdc{width:100%;background:var(--bg-card);border:1px solid var(--border-hi);border-radius:var(--rl);padding:20px;display:flex;flex-direction:column;gap:12px;margin:8px 0;text-align:left;}
-.rr{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--border);}
-.rr:last-child{padding-bottom:0;border-bottom:none;}
-.rla{font-family:var(--fm);font-size:9px;letter-spacing:.16em;color:var(--text-lo);flex-shrink:0;}
-.rwo{font-family:var(--fd);font-size:22px;color:var(--gold);}
-.rsp{font-size:15px;font-weight:600;color:var(--red);}
-.rgu{font-size:14px;color:var(--text-mid);}
-.rre{font-size:13px;color:var(--text-mid);text-align:right;}
+.reswin{font-family:var(--fa);font-size:11px;letter-spacing:.1em;color:var(--lo)}
+.resh{font-family:var(--fd);font-size:clamp(36px,10vw,52px);letter-spacing:.04em;line-height:1}
+.resh.p{color:var(--blue)}.resh.s{color:var(--red)}
+.rdc{width:100%;background:var(--card);border:1px solid var(--brh);border-radius:var(--rl);padding:20px;display:flex;flex-direction:column;gap:12px;margin:8px 0;text-align:left}
+.rr{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--br)}
+.rr:last-child{padding-bottom:0;border-bottom:none}
+.rla{font-family:var(--fa);font-size:10px;color:var(--lo);flex-shrink:0;direction:rtl}
+.rwo{font-family:var(--fd);font-size:22px;color:var(--gold)}
+.rsp{font-size:15px;font-weight:600;color:var(--red)}
+.rgu{font-size:14px;color:var(--mid)}
+.rre{font-size:13px;color:var(--mid);text-align:right}
 
 @media(max-width:400px){
-  .lt{font-size:44px}.cav{width:64px;height:64px;font-size:28px}.car{width:64px;height:64px}
+  .lt{font-size:40px}.cav{width:64px;height:64px;font-size:28px}.car{width:64px;height:64px}
   .vg{grid-template-columns:1fr}.vt{font-size:30px}
 }
   </style>
 </head>
 <body>
 
-<div id="cdot" title="Connecting..."></div>
+<div id="cdot" title="جاري الاتصال..."></div>
 <div class="scanlines" aria-hidden="true"></div>
 
 <div id="app">
 
-  <!-- ── SCREEN 1: LOBBY ── -->
-  <section id="screen-lobby" class="screen active">
+  <!-- ══ SETUP SCREEN (يظهر لو السيرفر مش متحدد) ══ -->
+  <section id="screen-setup" class="screen active">
+    <div class="setup-wrap">
+      <div class="setup-icon">🛠️</div>
+      <div class="setup-title">إعداد السيرفر</div>
+      <p class="setup-msg">
+        اللعبة محتاجة سيرفر خاص بيشتغل معاها.<br>
+        ارفع الـ <strong style="color:var(--gold)">server.js</strong> على <strong style="color:var(--gold)">Railway</strong> وحط الرابط هنا.
+      </p>
+      <div class="setup-steps card">
+        <div class="setup-steps-title">DEPLOYMENT STEPS</div>
+        <div class="setup-step">
+          <div class="step-num">1</div>
+          <div>روح على <a href="https://railway.app" target="_blank" style="color:var(--blue)">railway.app</a> وعمل حساب مجاني</div>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">2</div>
+          <div>ارفع الـ <span class="step-code">server.js</span> و <span class="step-code">package.json</span> — Railway هيشتغل أوتوماتيك</div>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">3</div>
+          <div>من Settings → Domain → هيديك رابط. حطه هنا:</div>
+        </div>
+        <div class="setup-url-row" style="margin-top:10px">
+          <input id="setup-url" type="text" class="fi" placeholder="https://your-app.railway.app" style="font-size:12px;padding:9px 12px"/>
+          <button id="btn-save-url" class="btn btn-p btn-sm">حفظ</button>
+        </div>
+        <p id="setup-err" class="err" style="text-align:left;font-size:10px"></p>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--br)">
+          <div class="setup-steps-title" style="margin-bottom:8px">OR RUN LOCALLY</div>
+          <div class="setup-step">
+            <div class="step-num">→</div>
+            <div>شغّل الـ server على جهازك: <span class="step-code">npm start</span> ثم اضغط هنا:</div>
+          </div>
+          <button id="btn-localhost" class="btn btn-s btn-sm" style="margin-top:8px">استخدم localhost:3000</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ LOBBY ══ -->
+  <section id="screen-lobby" class="screen">
     <div class="lbg" aria-hidden="true"></div>
     <header class="ll">
       <div class="le">CLASSIFIED OPERATION</div>
-      <h1 class="lt">SerMakshouf</h1>
-      <div class="la">سيرماكشوف</div>
-      <div class="ls">Voice-Only Social Deduction · العميل المزيف</div>
+      <h1 class="lt">سر مكشوف</h1>
+      <div class="ls">VOICE-ONLY SOCIAL DEDUCTION · لعبة الجواسيس</div>
     </header>
     <div class="card" style="margin-top:8px">
       <div class="cf">
-        <label for="un" class="fl">YOUR CODENAME</label>
-        <input id="un" type="text" class="fi" placeholder="Enter codename…" maxlength="20" autocomplete="off" />
+        <label for="un" class="fl">YOUR CODENAME — اسمك في اللعبة</label>
+        <input id="un" type="text" class="fi" placeholder="أدخل اسمك…" maxlength="20" autocomplete="off"/>
       </div>
-      <button id="btn-create" class="btn btn-p">Create New Room</button>
-      <div class="div"><span>OR JOIN EXISTING</span></div>
+      <button id="btn-create" class="btn btn-p">إنشاء غرفة جديدة</button>
+      <div class="div"><span>أو انضم لغرفة موجودة</span></div>
       <div class="cf">
-        <label for="rc" class="fl">ROOM CODE</label>
-        <input id="rc" type="text" class="fi fi-code" placeholder="ABC123" maxlength="6" autocomplete="off" />
+        <label for="rc" class="fl">ROOM CODE — كود الغرفة</label>
+        <input id="rc" type="text" class="fi fi-code" placeholder="ABC123" maxlength="6" autocomplete="off"/>
       </div>
-      <button id="btn-join" class="btn btn-s">Join Room</button>
+      <button id="btn-join" class="btn btn-s">انضم للغرفة</button>
       <p id="lobby-err" class="err" role="alert"></p>
     </div>
-    <footer class="lf">🎙 Voice-only · Up to 8 players · No text chat</footer>
+    <footer class="lf">🎙 صوت فقط · حتى 8 لاعبين · لا دردشة نصية</footer>
   </section>
 
-  <!-- ── SCREEN 2: WAITING ── -->
+  <!-- ══ WAITING ══ -->
   <section id="screen-waiting" class="screen">
     <div class="wh">
       <div class="rc">
-        <span class="rl">ROOM CODE</span>
-        <span id="rcode" class="rv"></span>
-        <button id="btn-copy" class="cb" title="Copy">⎘</button>
+        <span class="rcl">ROOM CODE</span>
+        <span id="rcode" class="rcv"></span>
+        <button id="btn-copy" class="cb" title="نسخ">⎘</button>
       </div>
     </div>
     <div class="wb">
-      <div class="st">AGENTS IN FIELD <span id="pcnt" class="pc">0/8</span></div>
+      <div class="st">العملاء في الميدان <span id="pcnt" class="pc">0/8</span></div>
       <ul id="plist" class="pl" aria-live="polite"></ul>
-      <p class="whi">Share the room code with your agents.</p>
+      <p class="whi">شارك الكود مع زملائك ليدخلوا اللعبة.</p>
       <div id="micp" class="mp hidden">
         <div class="mpi">🎙</div>
-        <p class="mpt">This game requires microphone access.</p>
-        <button id="btn-mic" class="btn btn-s btn-sm">Grant Microphone Access</button>
+        <p class="mpt">اللعبة محتاجة إذن الميكروفون.</p>
+        <button id="btn-mic" class="btn btn-s btn-sm">السماح بالميكروفون</button>
         <p id="micst" class="ms"></p>
       </div>
-      <button id="btn-start" class="btn btn-p" style="margin-top:auto" disabled>Start Mission</button>
-      <p id="hint-start" class="sh">Need at least 3 players to start.</p>
+      <button id="btn-start" class="btn btn-p" style="margin-top:auto" disabled>ابدأ المهمة</button>
+      <p id="hint-start" class="sh">تحتاج على الأقل 3 لاعبين.</p>
     </div>
   </section>
 
-  <!-- ── SCREEN 3: ROLE ── -->
+  <!-- ══ ROLE ══ -->
   <section id="screen-role" class="screen">
     <div class="rw">
       <div id="rcard" class="rcard">
         <div class="rct">
-          <div class="rcl">YOUR ROLE</div>
+          <div class="rcl">YOUR ROLE — دورك</div>
           <div id="rico" class="rci"></div>
           <div id="rname" class="rcn"></div>
         </div>
         <div id="rwords" class="rws">
-          <div class="rwl">THE SECRET WORD IS</div>
+          <div class="rwl">THE SECRET WORD — الكلمة السرية</div>
           <div id="rword" class="rwv"></div>
         </div>
         <div id="rspys" class="rss hidden">
-          <div class="rsm">You do NOT know the word.<br>Blend in. Don't get caught.</div>
+          <div class="rsm">أنت لا تعرف الكلمة السرية.<br>امتزج مع الآخرين ولا تنكشف!</div>
         </div>
       </div>
-      <p class="rcm">Game starting in <span id="rcdn">4</span>s…</p>
+      <p class="rcm">اللعبة تبدأ خلال <span id="rcdn">4</span> ثوان…</p>
     </div>
   </section>
 
-  <!-- ── SCREEN 4: GAME ── -->
+  <!-- ══ GAME ══ -->
   <section id="screen-game" class="screen">
     <div class="gt">
-      <div class="rb">ROUND <span id="cur-r">1</span> / <span id="tot-r">5</span></div>
+      <div class="rb">جولة <span id="cur-r">1</span> / <span id="tot-r">5</span></div>
       <div class="tw">
         <div class="tr">
           <svg class="ts" viewBox="0 0 60 60" aria-hidden="true">
@@ -333,63 +351,54 @@ body{background:var(--bg-void);color:var(--text-hi);font-family:var(--fb);font-s
       </div>
       <div id="wchip" class="wc hidden">🔑 <span id="wctxt"></span></div>
     </div>
-    <div class="stage" aria-label="Active speakers">
+    <div class="stage" aria-label="المتحدثان الآن">
       <div class="ch" id="ch-a">
-        <div class="car">
-          <div class="cav" id="av-a"></div>
-          <div class="pr" aria-hidden="true"></div>
-        </div>
+        <div class="car"><div class="cav" id="av-a"></div><div class="pr"></div></div>
         <div class="cn" id="nm-a">—</div>
         <div class="ci" id="in-a"></div>
       </div>
-      <div class="sc">
-        <div class="lb">LIVE</div>
-        <div class="mi">🎙</div>
-      </div>
+      <div class="sc"><div class="lb">LIVE</div><div class="mi">🎙</div></div>
       <div class="ch" id="ch-b">
-        <div class="car">
-          <div class="cav" id="av-b"></div>
-          <div class="pr" aria-hidden="true"></div>
-        </div>
+        <div class="car"><div class="cav" id="av-b"></div><div class="pr"></div></div>
         <div class="cn" id="nm-b">—</div>
         <div class="ci" id="in-b"></div>
       </div>
     </div>
     <div id="status-banner" class="sb"></div>
     <div class="asc">
-      <div class="asl">LISTENING</div>
+      <div class="asl">يستمعون</div>
       <div id="aud-row" class="asr"></div>
     </div>
     <div id="rnd-trans" class="rt hidden">
-      <div class="rtt" id="trans-txt">Round ended</div>
-      <div class="rts">Next round starting…</div>
+      <div class="rtt" id="trans-txt">انتهت الجولة</div>
+      <div class="rts">الجولة التالية تبدأ قريباً…</div>
     </div>
   </section>
 
-  <!-- ── SCREEN 5: VOTING ── -->
+  <!-- ══ VOTING ══ -->
   <section id="screen-voting" class="screen">
     <div class="vh">
-      <h2 class="vt">WHO IS THE SPY?</h2>
+      <h2 class="vt">من الجاسوس؟</h2>
       <div class="vtw">
-        <span style="font-size:9px;letter-spacing:.12em">Time left:</span>
+        <span>الوقت:</span>
         <span id="vtnum" class="vtn">45</span>s
       </div>
     </div>
-    <p class="vs">Tap a player to vote. Most-voted agent gets exposed.</p>
-    <div id="vgrid" class="vg" role="group" aria-label="Vote candidates"></div>
-    <div class="vp"><span id="vcast">0</span> / <span id="vtot">0</span> votes cast</div>
+    <p class="vs">اضغط على لاعب للتصويت ضده. الأكثر أصواتاً سينكشف.</p>
+    <div id="vgrid" class="vg" role="group"></div>
+    <div class="vp"><span id="vcast">0</span> / <span id="vtot">0</span> صوت</div>
     <div id="spy-panel" class="sgp hidden">
-      <div class="sgt">You were exposed! Guess the secret word to win:</div>
+      <div class="sgt">انكشفت! خمّن الكلمة السرية لتفوز:</div>
       <div class="sgf">
-        <input id="spy-in" type="text" class="fi" placeholder="Your guess…" maxlength="40" />
-        <button id="btn-spy" class="btn btn-d">Submit</button>
+        <input id="spy-in" type="text" class="fi" placeholder="تخمينك…" maxlength="40"/>
+        <button id="btn-spy" class="btn btn-d">إرسال</button>
       </div>
       <div id="spy-cd" class="sgc"></div>
     </div>
     <p id="vote-err" class="err" role="alert"></p>
   </section>
 
-  <!-- ── SCREEN 6: VOTE RESULT ── -->
+  <!-- ══ VOTE RESULT ══ -->
   <section id="screen-vote-result" class="screen">
     <div class="vrw">
       <div id="vr-ico" class="vri"></div>
@@ -397,13 +406,13 @@ body{background:var(--bg-void);color:var(--text-hi);font-family:var(--fb);font-s
       <div id="vr-sub" class="vrs"></div>
       <div id="spy-await" class="sga hidden">
         <div class="pd"></div>
-        Waiting for spy to guess…
+        في انتظار تخمين الجاسوس…
         <span id="ga-cd"></span>
       </div>
     </div>
   </section>
 
-  <!-- ── SCREEN 7: FINAL RESULT ── -->
+  <!-- ══ FINAL RESULT ══ -->
   <section id="screen-results" class="screen">
     <div id="res-bg" class="resbg"></div>
     <div class="resw">
@@ -411,394 +420,353 @@ body{background:var(--bg-void);color:var(--text-hi);font-family:var(--fb);font-s
       <div id="res-win" class="reswin"></div>
       <div id="res-hed" class="resh"></div>
       <div class="rdc">
-        <div class="rr"><span class="rla">THE WORD WAS</span><span id="res-word" class="rwo"></span></div>
-        <div class="rr"><span class="rla">THE SPY WAS</span><span id="res-spy" class="rsp"></span></div>
-        <div id="res-gr" class="rr hidden"><span class="rla">SPY GUESSED</span><span id="res-gu" class="rgu"></span></div>
-        <div class="rr"><span class="rla">REASON</span><span id="res-rea" class="rre"></span></div>
+        <div class="rr"><span class="rla">الكلمة كانت</span><span id="res-word" class="rwo"></span></div>
+        <div class="rr"><span class="rla">الجاسوس كان</span><span id="res-spy" class="rsp"></span></div>
+        <div id="res-gr" class="rr hidden"><span class="rla">خمّن الجاسوس</span><span id="res-gu" class="rgu"></span></div>
+        <div class="rr"><span class="rla">السبب</span><span id="res-rea" class="rre"></span></div>
       </div>
-      <button id="btn-again" class="btn btn-p">Play Again</button>
+      <button id="btn-again" class="btn btn-p">العب مرة أخرى</button>
     </div>
   </section>
 
-</div><!-- /#app -->
+</div>
 
 <div id="audio-box" aria-hidden="true" style="display:none"></div>
 
-<script src="/socket.io/socket.io.js"></script>
+<!-- Socket.IO من CDN بدل السيرفر المحلي -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-/* ═══════════════════════════════════════════════
-   SerMakshouf · Client
-   State · RTC · Timer · UI · Sockets · Boot
-═══════════════════════════════════════════════ */
+/* ════════════════════════════════════════
+   سر مكشوف · Client JS
+════════════════════════════════════════ */
+
+/* ── CONFIG: رابط السيرفر ── */
+// هيتحدد من localStorage أو من الـ setup screen
+let BACKEND_URL = localStorage.getItem('sm_backend_url') || '';
 
 /* ── STATE ── */
-const S = {
-  socket:null, myId:null, myName:'',
-  roomCode:'', isHost:false,
-  role:null, word:null,
-  players:[], totalRounds:5, curRound:0,
-  activePair:[], voted:false,
-};
+const S={socket:null,myId:null,roomCode:'',isHost:false,role:null,word:null,players:[],totalRounds:5,voted:false};
 
 /* ── UTILS ── */
-const $  = id => document.getElementById(id);
-const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const COLS = ['#d4a017','#3ab7e8','#e63946','#2dc78a','#a855f7','#f97316','#ec4899','#14b8a6'];
-const cmap = new Map();
-function col(id){ if(!cmap.has(id)) cmap.set(id,cmap.size%COLS.length); return COLS[cmap.get(id)]; }
-function ini(n){ return n?n[0].toUpperCase():'?'; }
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const COLS=['#d4a017','#3ab7e8','#e63946','#2dc78a','#a855f7','#f97316','#ec4899','#14b8a6'];
+const cmap=new Map();
+function col(id){if(!cmap.has(id))cmap.set(id,cmap.size%COLS.length);return COLS[cmap.get(id)];}
+function ini(n){return n?n[0].toUpperCase():'?';}
 function showScreen(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  const el = $('screen-'+name); if(el) el.classList.add('active');
+  const el=$('screen-'+name);if(el)el.classList.add('active');
 }
-function showErr(screen, msg){
-  const el = $(screen+'-err'); if(!el) return;
-  el.textContent = msg;
-  setTimeout(()=>{ el.textContent=''; }, 5000);
-}
+function showErr(id,msg){const el=$(id+'-err');if(!el)return;el.textContent=msg;setTimeout(()=>el.textContent='',5000);}
 
 /* ── TIMER ── */
-const TMR = (()=>{
-  const C=163.36; let iv=null;
-  function start(sec,nel,ael,onEnd){
-    stop(); let n=sec; render(n,sec,nel,ael);
-    iv=setInterval(()=>{ n--; render(Math.max(0,n),sec,nel,ael); if(n<=0){stop();if(onEnd)onEnd();} },1000);
+const TMR=(()=>{
+  const C=163.36;let iv=null;
+  function start(sec,nel,ael,cb){
+    stop();let n=sec;render(n,sec,nel,ael);
+    iv=setInterval(()=>{n--;render(Math.max(0,n),sec,nel,ael);if(n<=0){stop();if(cb)cb();}},1000);
   }
-  function stop(){ if(iv){clearInterval(iv);iv=null;} }
+  function stop(){if(iv){clearInterval(iv);iv=null;}}
   function render(cur,tot,nel,ael){
-    if(nel) nel.textContent=cur;
-    if(ael){ ael.style.strokeDashoffset=C*(1-cur/tot); ael.classList.toggle('urg',cur<=10); if(nel) nel.classList.toggle('urg',cur<=10); }
+    if(nel)nel.textContent=cur;
+    if(ael){ael.style.strokeDashoffset=C*(1-cur/tot);ael.classList.toggle('urg',cur<=10);if(nel)nel.classList.toggle('urg',cur<=10);}
   }
-  return {start,stop};
+  return{start,stop};
 })();
 
 /* ── WEBRTC ── */
-const RTC = (()=>{
-  const peers=new Map(), pend=new Map(); let ls=null;
+const RTC=(()=>{
+  const peers=new Map(),pend=new Map();let ls=null;
   const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
-
   async function getMic(){
-    try{
-      ls=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
-      mute(true); return true;
-    }catch(e){console.warn('[RTC] mic denied',e);return false;}
+    try{ls=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});mute(true);return true;}
+    catch(e){console.warn('[RTC]',e);return false;}
   }
-  function mute(m){ if(ls) ls.getAudioTracks().forEach(t=>t.enabled=!m); }
-  function setActive(ids){ const sp=ids.includes(S.myId); mute(!sp); return sp; }
-
+  function mute(m){if(ls)ls.getAudioTracks().forEach(t=>t.enabled=!m);}
+  function setActive(ids){const sp=ids.includes(S.myId);mute(!sp);return sp;}
   async function connect(pid,init){
-    if(peers.has(pid)) return;
-    const pc=new RTCPeerConnection(ICE); peers.set(pid,pc);
-    if(ls) ls.getTracks().forEach(t=>pc.addTrack(t,ls));
+    if(peers.has(pid))return;
+    const pc=new RTCPeerConnection(ICE);peers.set(pid,pc);
+    if(ls)ls.getTracks().forEach(t=>pc.addTrack(t,ls));
     pc.ontrack=e=>play(pid,e.streams[0]||new MediaStream([e.track]));
-    pc.onicecandidate=e=>{if(e.candidate) S.socket.emit('webrtc:ice',{to:pid,candidate:e.candidate});};
-    pc.onconnectionstatechange=()=>{if(pc.connectionState==='failed') pc.restartIce();};
+    pc.onicecandidate=e=>{if(e.candidate)S.socket.emit('webrtc:ice',{to:pid,candidate:e.candidate});};
+    pc.onconnectionstatechange=()=>{if(pc.connectionState==='failed')pc.restartIce();};
     if(init){const o=await pc.createOffer();await pc.setLocalDescription(o);S.socket.emit('webrtc:offer',{to:pid,offer:pc.localDescription});}
   }
   async function onOffer(from,offer){
-    if(!peers.has(from)) await connect(from,false);
-    const pc=peers.get(from); if(!pc) return;
+    if(!peers.has(from))await connect(from,false);
+    const pc=peers.get(from);if(!pc)return;
     await pc.setRemoteDescription(new RTCSessionDescription(offer));
-    const a=await pc.createAnswer(); await pc.setLocalDescription(a);
-    S.socket.emit('webrtc:answer',{to:from,answer:pc.localDescription});
-    flush(from,pc);
+    const a=await pc.createAnswer();await pc.setLocalDescription(a);
+    S.socket.emit('webrtc:answer',{to:from,answer:pc.localDescription});flush(from,pc);
   }
-  async function onAnswer(from,answer){
-    const pc=peers.get(from); if(!pc) return;
-    await pc.setRemoteDescription(new RTCSessionDescription(answer)); flush(from,pc);
-  }
+  async function onAnswer(from,answer){const pc=peers.get(from);if(!pc)return;await pc.setRemoteDescription(new RTCSessionDescription(answer));flush(from,pc);}
   async function onIce(from,c){
     const pc=peers.get(from);
     if(!pc||!pc.remoteDescription){if(!pend.has(from))pend.set(from,[]);pend.get(from).push(c);return;}
     try{await pc.addIceCandidate(new RTCIceCandidate(c));}catch(_){}
   }
-  async function flush(id,pc){ for(const c of(pend.get(id)||[])){try{await pc.addIceCandidate(new RTCIceCandidate(c));}catch(_){}} pend.delete(id); }
-  function play(id,stream){
-    let a=$('aud-'+id); if(!a){a=document.createElement('audio');a.id='aud-'+id;a.autoplay=true;a.playsInline=true;$('audio-box').appendChild(a);}
-    a.srcObject=stream;
-  }
-  function drop(id){ const pc=peers.get(id);if(pc){pc.close();peers.delete(id);}pend.delete(id);const a=$('aud-'+id);if(a)a.remove(); }
-  function dropAll(){ peers.forEach((_,id)=>drop(id));if(ls){ls.getTracks().forEach(t=>t.stop());ls=null;} }
-  return {getMic,setActive,connect,onOffer,onAnswer,onIce,drop,dropAll};
+  async function flush(id,pc){for(const c of(pend.get(id)||[])){try{await pc.addIceCandidate(new RTCIceCandidate(c));}catch(_){}}pend.delete(id);}
+  function play(id,stream){let a=$('aud-'+id);if(!a){a=document.createElement('audio');a.id='aud-'+id;a.autoplay=true;a.playsInline=true;$('audio-box').appendChild(a);}a.srcObject=stream;}
+  function drop(id){const pc=peers.get(id);if(pc){pc.close();peers.delete(id);}pend.delete(id);const a=$('aud-'+id);if(a)a.remove();}
+  function dropAll(){peers.forEach((_,id)=>drop(id));if(ls){ls.getTracks().forEach(t=>t.stop());ls=null;}}
+  return{getMic,setActive,connect,onOffer,onAnswer,onIce,drop,dropAll};
 })();
 
-/* ── UI ── */
+/* ── UI HELPERS ── */
 function renderPlayers(players){
-  const list=$('plist'); if(!list) return;
+  const list=$('plist');if(!list)return;
   list.innerHTML='';
   players.forEach(p=>{
-    const li=document.createElement('li'); li.className='pi';
-    li.innerHTML=`<div class="pa" style="color:${col(p.id)}">${ini(p.username)}</div><span class="pn">${esc(p.username)}</span>${p.isHost?'<span class="hb">HOST</span>':''}${p.id===S.myId?'<span class="yb">YOU</span>':''}`;
+    const li=document.createElement('li');li.className='pi';
+    li.innerHTML=`<div class="pa" style="color:${col(p.id)}">${ini(p.username)}</div><span class="pn">${esc(p.username)}</span>${p.isHost?'<span class="hb">HOST</span>':''}${p.id===S.myId?'<span class="yb">أنت</span>':''}`;
     list.appendChild(li);
   });
-  const b=$('pcnt'); if(b) b.textContent=players.length+'/8';
+  const b=$('pcnt');if(b)b.textContent=players.length+'/8';
 }
-
 function refreshStart(n){
-  const btn=$('btn-start'); if(!btn) return;
-  if(S.isHost){
-    btn.disabled = n<3;
-    $('hint-start').style.display = n>=3?'none':'';
-  }
+  const btn=$('btn-start');if(!btn)return;
+  if(S.isHost){btn.disabled=n<3;$('hint-start').style.display=n>=3?'none':'';}
 }
-
 function renderRound(d){
-  const [p1,p2]=d.activePlayers;
-  $('cur-r').textContent=d.roundNumber; $('tot-r').textContent=d.totalRounds;
+  const[p1,p2]=d.activePlayers;
+  $('cur-r').textContent=d.roundNumber;$('tot-r').textContent=d.totalRounds;
   const av1=$('av-a'),av2=$('av-b'),n1=$('nm-a'),n2=$('nm-b'),i1=$('in-a'),i2=$('in-b');
   if(av1){av1.textContent=ini(p1.username);av1.style.color=col(p1.id);}
   if(av2){av2.textContent=ini(p2.username);av2.style.color=col(p2.id);}
-  if(n1) n1.textContent=p1.username;
-  if(n2) n2.textContent=p2.username;
-  if(i1) i1.textContent=p1.id===S.myId?'🎙 YOU':'🎙';
-  if(i2) i2.textContent=p2.id===S.myId?'🎙 YOU':'🎙';
-  $('ch-a')?.classList.add('spk'); $('ch-b')?.classList.add('spk');
-
-  const banner=$('status-banner');
-  const spk=p1.id===S.myId||p2.id===S.myId;
-  if(banner){banner.className='sb '+(spk?'spk':'lst');banner.textContent=spk?'🎙 YOU ARE SPEAKING — Your mic is live':'👂 YOU ARE LISTENING — Mic muted';}
-
+  if(n1)n1.textContent=p1.username;if(n2)n2.textContent=p2.username;
+  if(i1)i1.textContent=p1.id===S.myId?'🎙 أنت':'🎙';
+  if(i2)i2.textContent=p2.id===S.myId?'🎙 أنت':'🎙';
+  $('ch-a')?.classList.add('spk');$('ch-b')?.classList.add('spk');
+  const banner=$('status-banner'),spk=p1.id===S.myId||p2.id===S.myId;
+  if(banner){banner.className='sb '+(spk?'spk':'lst');banner.textContent=spk?'🎙 أنت تتكلم — الميكروفون شغّال':'👂 أنت تستمع — الميكروفون صامت';}
   const chip=$('wchip');
   if(chip){if(S.word){chip.classList.remove('hidden');$('wctxt').textContent=S.word;}else chip.classList.add('hidden');}
-
   const ar=$('aud-row');
-  if(ar){
-    const pids=d.activePlayers.map(p=>p.id); ar.innerHTML='';
-    S.players.filter(p=>!pids.includes(p.id)).forEach(p=>{
-      const c=document.createElement('div');c.className='ac';
-      c.innerHTML=`<div class="aa" style="color:${col(p.id)}">${ini(p.username)}</div><span>${esc(p.username)}${p.id===S.myId?' (you)':''}</span>`;
-      ar.appendChild(c);
-    });
-  }
+  if(ar){const pids=d.activePlayers.map(p=>p.id);ar.innerHTML='';S.players.filter(p=>!pids.includes(p.id)).forEach(p=>{const c=document.createElement('div');c.className='ac';c.innerHTML=`<div class="aa" style="color:${col(p.id)}">${ini(p.username)}</div><span>${esc(p.username)}${p.id===S.myId?' (أنت)':''}</span>`;ar.appendChild(c);});}
   $('rnd-trans')?.classList.add('hidden');
 }
-
-function renderVotes(players, onVote){
-  const g=$('vgrid'); if(!g) return;
-  g.innerHTML=''; $('vtot').textContent=players.length-1;
+function renderVotes(players,onVote){
+  const g=$('vgrid');if(!g)return;g.innerHTML='';$('vtot').textContent=players.length-1;
   players.forEach(p=>{
-    if(p.id===S.myId) return;
-    const c=document.createElement('div'); c.className='vc'; c.dataset.id=p.id;
-    c.innerHTML=`<div class="vca" style="color:${col(p.id)}">${ini(p.username)}</div><div class="vcn">${esc(p.username)}</div><div class="vcc" id="vc-${p.id}">0 votes</div>`;
-    c.addEventListener('click',()=>{
-      if(S.voted) return;
-      g.querySelectorAll('.vc').forEach(x=>x.classList.remove('sel'));
-      c.classList.add('sel'); S.voted=true;
-      g.querySelectorAll('.vc').forEach(x=>x.classList.add('dis'));
-      onVote(p.id);
-    });
+    if(p.id===S.myId)return;
+    const c=document.createElement('div');c.className='vc';c.dataset.id=p.id;
+    c.innerHTML=`<div class="vca" style="color:${col(p.id)}">${ini(p.username)}</div><div class="vcn">${esc(p.username)}</div><div class="vcc" id="vc-${p.id}">0 أصوات</div>`;
+    c.addEventListener('click',()=>{if(S.voted)return;g.querySelectorAll('.vc').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');S.voted=true;g.querySelectorAll('.vc').forEach(x=>x.classList.add('dis'));onVote(p.id);});
     g.appendChild(c);
   });
 }
 
 /* ── MIC SETUP ── */
 async function setupMic(){
-  const mp=$('micp'), ms=$('micst');
+  const mp=$('micp'),ms=$('micst');
   let granted=false;
-  try{ const r=await navigator.permissions.query({name:'microphone'}); granted=r.state==='granted'; }catch(_){}
-  if(granted){ const ok=await RTC.getMic(); if(ok&&ms){ms.textContent='✓ Microphone ready';} return; }
-  if(mp) mp.classList.remove('hidden');
+  try{const r=await navigator.permissions.query({name:'microphone'});granted=r.state==='granted';}catch(_){}
+  if(granted){const ok=await RTC.getMic();if(ok&&ms){ms.style.color='var(--green)';ms.textContent='✓ الميكروفون جاهز';}return;}
+  if(mp)mp.classList.remove('hidden');
   const mb=$('btn-mic');
-  if(mb) mb.addEventListener('click',async()=>{
-    mb.disabled=true; mb.textContent='Requesting…';
+  if(mb)mb.addEventListener('click',async()=>{
+    mb.disabled=true;mb.textContent='جاري الطلب…';
     const ok=await RTC.getMic();
-    if(ok){ if(ms){ms.style.color='var(--green)';ms.textContent='✓ Microphone ready';} setTimeout(()=>{if(mp)mp.classList.add('hidden');},1500); }
-    else{ if(ms){ms.style.color='var(--red)';ms.textContent='✗ Denied. Voice will not work.';} mb.disabled=false; mb.textContent='Try Again'; }
+    if(ok){if(ms){ms.style.color='var(--green)';ms.textContent='✓ الميكروفون جاهز';}setTimeout(()=>{if(mp)mp.classList.add('hidden');},1500);}
+    else{if(ms){ms.style.color='var(--red)';ms.textContent='✗ تم الرفض. الصوت لن يعمل.';}mb.disabled=false;mb.textContent='حاول مرة أخرى';}
   },{once:true});
+}
+
+/* ── CONNECT TO SERVER ── */
+function connectToServer(url){
+  // Clean up old socket if exists
+  if(S.socket){S.socket.disconnect();S.socket=null;}
+
+  const sk=io(url,{
+    transports:['websocket','polling'],
+    reconnectionAttempts:3,
+    timeout:8000,
+  });
+  S.socket=sk;
+
+  sk.on('connect',()=>{
+    S.myId=sk.id;
+    const d=$('cdot');if(d){d.className='on';d.title='متصل ✓';}
+    // Save working URL
+    localStorage.setItem('sm_backend_url',url);
+    BACKEND_URL=url;
+    console.log('[Socket] Connected to',url);
+    showScreen('lobby');
+  });
+
+  sk.on('disconnect',()=>{const d=$('cdot');if(d){d.className='off';d.title='انقطع الاتصال';}});
+
+  sk.on('connect_error',(e)=>{
+    console.error('[Socket] connect_error',e.message);
+    const se=$('setup-err');
+    if(se)se.textContent='❌ تعذر الاتصال. تأكد من الرابط وأن السيرفر شغّال.';
+    showScreen('setup');
+  });
+
+  bindSocket(sk);
 }
 
 /* ── SOCKET EVENTS ── */
 function bindSocket(sk){
-
-  sk.on('connect',()=>{
-    S.myId=sk.id;
-    const d=$('cdot'); if(d){d.className='on';d.title='Connected';}
-  });
-  sk.on('disconnect',()=>{ const d=$('cdot');if(d){d.className='off';d.title='Disconnected';} });
-  sk.on('connect_error',(e)=>{ showErr('lobby','Cannot reach server. Run: npm start'); console.error('[Socket]',e); });
-
   sk.on('room:created',({roomCode,players,isHost})=>{
-    S.roomCode=roomCode; S.isHost=isHost; S.players=players; S.myId=sk.id;
-    $('rcode').textContent=roomCode;
-    showScreen('waiting');
-    renderPlayers(players);
-    refreshStart(players.length);
-    setupMic();
+    S.roomCode=roomCode;S.isHost=isHost;S.players=players;S.myId=sk.id;
+    $('rcode').textContent=roomCode;showScreen('waiting');renderPlayers(players);refreshStart(players.length);setupMic();
   });
-
   sk.on('room:joined',({roomCode,players})=>{
-    S.roomCode=roomCode; S.isHost=false; S.players=players; S.myId=sk.id;
-    $('rcode').textContent=roomCode;
-    showScreen('waiting');
-    renderPlayers(players);
-    setupMic();
+    S.roomCode=roomCode;S.isHost=false;S.players=players;S.myId=sk.id;
+    $('rcode').textContent=roomCode;showScreen('waiting');renderPlayers(players);setupMic();
   });
-
   sk.on('room:playerJoined',async({players,newPeerId})=>{
-    S.players=players; renderPlayers(players); refreshStart(players.length);
-    if(newPeerId&&newPeerId!==S.myId) await RTC.connect(newPeerId,true);
+    S.players=players;renderPlayers(players);refreshStart(players.length);
+    if(newPeerId&&newPeerId!==S.myId)await RTC.connect(newPeerId,true);
   });
-
   sk.on('room:playerLeft',({playerId,players,newHostId})=>{
-    S.players=players; renderPlayers(players); RTC.drop(playerId);
-    if(newHostId===S.myId){S.isHost=true; refreshStart(players.length);}
-    else refreshStart(players.length);
+    S.players=players;renderPlayers(players);RTC.drop(playerId);
+    if(newHostId===S.myId){S.isHost=true;}refreshStart(players.length);
   });
-
-  /* WebRTC signaling */
-  sk.on('webrtc:offer', ({from,offer})    => RTC.onOffer(from,offer));
-  sk.on('webrtc:answer',({from,answer})   => RTC.onAnswer(from,answer));
-  sk.on('webrtc:ice',  ({from,candidate}) => RTC.onIce(from,candidate));
-
-  /* Game flow */
+  sk.on('webrtc:offer',({from,offer})=>RTC.onOffer(from,offer));
+  sk.on('webrtc:answer',({from,answer})=>RTC.onAnswer(from,answer));
+  sk.on('webrtc:ice',({from,candidate})=>RTC.onIce(from,candidate));
   sk.on('game:started',({role,word,totalRounds,players})=>{
-    S.role=role; S.word=word; S.totalRounds=totalRounds; S.players=players;
-    showScreen('role');
-    const card=$('rcard'); if(card) card.className='rcard '+(role==='spy'?'rs':'rp');
-    const ico=$('rico'); if(ico) ico.textContent=role==='spy'?'🕵️':'🔍';
-    const rn=$('rname'); if(rn) rn.textContent=role==='spy'?'THE SPY':'AGENT';
-    if(role==='spy'){ $('rwords').classList.add('hidden'); $('rspys').classList.remove('hidden'); }
-    else { $('rwords').classList.remove('hidden'); $('rspys').classList.add('hidden'); const rw=$('rword');if(rw) rw.textContent=word; }
-    let n=4; const cd=$('rcdn'); if(cd) cd.textContent=n;
+    S.role=role;S.word=word;S.totalRounds=totalRounds;S.players=players;showScreen('role');
+    const card=$('rcard');if(card)card.className='rcard '+(role==='spy'?'rs':'rp');
+    const ico=$('rico');if(ico)ico.textContent=role==='spy'?'🕵️':'🔍';
+    const rn=$('rname');if(rn)rn.textContent=role==='spy'?'الجاسوس':'عميل';
+    if(role==='spy'){$('rwords').classList.add('hidden');$('rspys').classList.remove('hidden');}
+    else{$('rwords').classList.remove('hidden');$('rspys').classList.add('hidden');const rw=$('rword');if(rw)rw.textContent=word;}
+    let n=4;const cd=$('rcdn');if(cd)cd.textContent=n;
     const t=setInterval(()=>{n--;if(cd)cd.textContent=Math.max(0,n);if(n<=0)clearInterval(t);},1000);
   });
-
   sk.on('round:start',data=>{
-    TMR.stop(); S.curRound=data.roundNumber; S.activePair=data.activePlayers;
-    RTC.setActive(data.activePlayers.map(p=>p.id));
-    showScreen('game'); renderRound(data);
-    TMR.start(data.duration,$('tnum'),$('tarc'));
+    TMR.stop();S.activePair=data.activePlayers;RTC.setActive(data.activePlayers.map(p=>p.id));
+    showScreen('game');renderRound(data);TMR.start(data.duration,$('tnum'),$('tarc'));
   });
-
   sk.on('round:end',({roundNumber})=>{
-    TMR.stop(); RTC.setActive([]);
-    const t=$('rnd-trans'),tx=$('trans-txt');
-    if(t) t.classList.remove('hidden');
-    if(tx) tx.textContent='Round '+roundNumber+' ended';
-    const a=$('tarc'); if(a) a.style.strokeDashoffset=0;
+    TMR.stop();RTC.setActive([]);
+    const t=$('rnd-trans'),tx=$('trans-txt');if(t)t.classList.remove('hidden');if(tx)tx.textContent='جولة '+roundNumber+' انتهت';
+    const a=$('tarc');if(a)a.style.strokeDashoffset=0;
   });
-
   sk.on('vote:start',({players,duration})=>{
-    TMR.stop(); S.voted=false; showScreen('voting');
+    TMR.stop();S.voted=false;showScreen('voting');
     renderVotes(players,id=>sk.emit('vote:cast',{votedId:id}));
     TMR.start(duration,$('vtnum'),null);
-    const p=$('spy-panel');if(p) p.classList.add('hidden');
-    const si=$('spy-in'),sb=$('btn-spy');if(si){si.value='';si.disabled=false;}if(sb) sb.disabled=false;
+    const p=$('spy-panel');if(p)p.classList.add('hidden');
+    const si=$('spy-in'),sb=$('btn-spy');if(si){si.value='';si.disabled=false;}if(sb)sb.disabled=false;
     $('vcast').textContent='0';
   });
-
   sk.on('vote:update',({voteCounts,totalVotes})=>{
-    Object.entries(voteCounts).forEach(([id,n])=>{ const el=$('vc-'+id);if(el) el.textContent=n+(n===1?' vote':' votes'); });
-    const vc=$('vcast');if(vc) vc.textContent=totalVotes;
+    Object.entries(voteCounts).forEach(([id,n])=>{const el=$('vc-'+id);if(el)el.textContent=n+(n===1?' صوت':' أصوات');});
+    const vc=$('vcast');if(vc)vc.textContent=totalVotes;
   });
-
   sk.on('vote:result',data=>{
     TMR.stop();
-    // Spy sees guess panel, others see result screen
-    if(data.isSpy && S.myId===data.spyId){
+    if(data.isSpy&&S.myId===data.spyId){
       showScreen('voting');
-      const p=$('spy-panel'); if(p) p.classList.remove('hidden');
-      const g=$('vgrid');if(g) g.style.pointerEvents='none';
-      let n=20; const cd=$('spy-cd');if(cd) cd.textContent=n+'s remaining';
-      const t=setInterval(()=>{n--;if(cd) cd.textContent=Math.max(0,n)+'s remaining';if(n<=0)clearInterval(t);},1000);
+      const p=$('spy-panel');if(p)p.classList.remove('hidden');
+      const g=$('vgrid');if(g)g.style.pointerEvents='none';
+      let n=20;const cd=$('spy-cd');if(cd)cd.textContent=n+'ث';
+      const t=setInterval(()=>{n--;if(cd)cd.textContent=Math.max(0,n)+'ث';if(n<=0)clearInterval(t);},1000);
     } else {
       showScreen('vote-result');
       const ico=$('vr-ico'),hd=$('vr-head'),sub=$('vr-sub');
       if(data.isSpy){
-        if(ico) ico.textContent='🎯';
-        if(hd){hd.textContent=data.mostVotedName+' is the SPY!';hd.style.color='var(--red)';}
-        if(sub) sub.textContent='Correct! Can they guess the word?';
-        const aw=$('spy-await'); if(aw){
-          aw.classList.remove('hidden');
-          let n=20; const gc=$('ga-cd');if(gc) gc.textContent=' ('+n+'s)';
-          const t=setInterval(()=>{n--;if(gc) gc.textContent=' ('+Math.max(0,n)+'s)';if(n<=0)clearInterval(t);},1000);
-        }
+        if(ico)ico.textContent='🎯';
+        if(hd){hd.textContent=data.mostVotedName+' هو الجاسوس!';hd.style.color='var(--red)';}
+        if(sub)sub.textContent='صح! هل يستطيع تخمين الكلمة السرية؟';
+        const aw=$('spy-await');if(aw){aw.classList.remove('hidden');let n=20;const gc=$('ga-cd');if(gc)gc.textContent=' ('+n+'ث)';const t=setInterval(()=>{n--;if(gc)gc.textContent=' ('+Math.max(0,n)+'ث)';if(n<=0)clearInterval(t);},1000);}
       } else {
-        if(ico) ico.textContent='😱';
-        if(hd){hd.textContent=data.mostVotedName+' is INNOCENT!';hd.style.color='var(--blue)';}
-        if(sub) sub.textContent='Wrong vote! The spy wins!';
+        if(ico)ico.textContent='😱';
+        if(hd){hd.textContent=data.mostVotedName+' بريء!';hd.style.color='var(--blue)';}
+        if(sub)sub.textContent='صوّتوا على الشخص الغلط! الجاسوس فاز!';
       }
     }
   });
-
-  sk.on('spy:guessChance',({spyId})=>{
-    if(S.myId===spyId){ showScreen('voting'); const p=$('spy-panel');if(p) p.classList.remove('hidden'); }
-  });
-
+  sk.on('spy:guessChance',({spyId})=>{if(S.myId===spyId){showScreen('voting');const p=$('spy-panel');if(p)p.classList.remove('hidden');}});
   sk.on('game:result',data=>{
-    TMR.stop(); RTC.dropAll(); showScreen('results');
+    TMR.stop();RTC.dropAll();showScreen('results');
     const bg=$('res-bg'),tr=$('res-tro'),wn=$('res-win'),hd=$('res-hed');
-    if(data.winner==='players'){
-      if(bg) bg.className='resbg pw';
-      if(tr) tr.textContent='🏆'; if(wn) wn.textContent='AGENTS WIN';
-      if(hd){hd.textContent='SPY EXPOSED!';hd.className='resh p';}
-    } else {
-      if(bg) bg.className='resbg sw';
-      if(tr) tr.textContent='🕵️'; if(wn) wn.textContent='SPY WINS';
-      if(hd){hd.textContent='MISSION FAILED';hd.className='resh s';}
-    }
+    if(data.winner==='players'){if(bg)bg.className='resbg pw';if(tr)tr.textContent='🏆';if(wn)wn.textContent='العملاء فازوا';if(hd){hd.textContent='انكشف الجاسوس!';hd.className='resh p';}}
+    else{if(bg)bg.className='resbg sw';if(tr)tr.textContent='🕵️';if(wn)wn.textContent='الجاسوس فاز';if(hd){hd.textContent='المهمة فشلت';hd.className='resh s';}}
     const rw=$('res-word'),rs=$('res-spy'),rr=$('res-rea');
-    if(rw) rw.textContent=data.word; if(rs) rs.textContent=data.spyName; if(rr) rr.textContent=data.reason;
+    if(rw)rw.textContent=data.word;if(rs)rs.textContent=data.spyName;if(rr)rr.textContent=data.reason;
     const gr=$('res-gr'),rg=$('res-gu');
-    if(data.spyGuess){ if(gr) gr.classList.remove('hidden'); if(rg){rg.textContent='"'+data.spyGuess+'" — '+(data.correct?'✅ Correct!':'❌ Wrong');rg.style.color=data.correct?'var(--green)':'var(--red)';} }
-    else if(gr) gr.classList.add('hidden');
+    if(data.spyGuess){if(gr)gr.classList.remove('hidden');if(rg){rg.textContent='"'+data.spyGuess+'" — '+(data.correct?'✅ صح!':'❌ غلط');rg.style.color=data.correct?'var(--green)':'var(--red)';}}
+    else if(gr)gr.classList.add('hidden');
   });
-
-  sk.on('game:aborted',({reason})=>{ TMR.stop();RTC.dropAll();alert('Game ended: '+reason);location.reload(); });
-
+  sk.on('game:aborted',({reason})=>{TMR.stop();RTC.dropAll();alert('انتهت اللعبة: '+reason);location.reload();});
   sk.on('error',({message})=>{
     const a=document.querySelector('.screen.active');
     const id=a?a.id.replace('screen-',''):'lobby';
-    showErr(id, message);
+    showErr(id,message);
   });
 }
 
 /* ── BUTTON LISTENERS ── */
 function bindButtons(){
-  const sk=S.socket;
+  // Setup screen
+  $('btn-save-url').addEventListener('click',()=>{
+    const url=$('setup-url').value.trim().replace(/\/$/,'');
+    if(!url||!url.startsWith('http')){const se=$('setup-err');if(se)se.textContent='أدخل رابطاً صحيحاً يبدأ بـ https://';return;}
+    const se=$('setup-err');if(se)se.textContent='جاري الاتصال…';
+    connectToServer(url);
+  });
+  $('btn-localhost').addEventListener('click',()=>{
+    const se=$('setup-err');if(se)se.textContent='جاري الاتصال بـ localhost…';
+    connectToServer('http://localhost:3000');
+  });
+  $('setup-url').addEventListener('keydown',e=>{if(e.key==='Enter')$('btn-save-url').click();});
 
+  // Lobby
   function doCreate(){
-    const u=$('un').value.trim();
-    if(!u) return showErr('lobby','Please enter a codename.');
-    S.myName=u; sk.emit('room:create',{username:u});
+    const u=$('un').value.trim();if(!u)return showErr('lobby','أدخل اسمك أولاً.');
+    S.socket.emit('room:create',{username:u});
   }
   function doJoin(){
-    const u=$('un').value.trim(), c=$('rc').value.trim().toUpperCase();
-    if(!u) return showErr('lobby','Please enter a codename.');
-    if(!c) return showErr('lobby','Please enter a room code.');
-    S.myName=u; sk.emit('room:join',{roomCode:c,username:u});
+    const u=$('un').value.trim(),c=$('rc').value.trim().toUpperCase();
+    if(!u)return showErr('lobby','أدخل اسمك أولاً.');
+    if(!c)return showErr('lobby','أدخل كود الغرفة.');
+    S.socket.emit('room:join',{roomCode:c,username:u});
   }
+  $('btn-create').addEventListener('click',doCreate);
+  $('btn-join').addEventListener('click',doJoin);
+  $('un').addEventListener('keydown',e=>{if(e.key==='Enter'){$('rc').value.trim()?doJoin():doCreate();}});
+  $('rc').addEventListener('keydown',e=>{if(e.key==='Enter')doJoin();});
+  $('rc').addEventListener('input',e=>{const p=e.target.selectionStart;e.target.value=e.target.value.toUpperCase();e.target.setSelectionRange(p,p);});
 
-  $('btn-create').addEventListener('click', doCreate);
-  $('btn-join').addEventListener('click', doJoin);
-  $('un').addEventListener('keydown', e=>{ if(e.key==='Enter'){ $('rc').value.trim()?doJoin():doCreate(); } });
-  $('rc').addEventListener('keydown', e=>{ if(e.key==='Enter') doJoin(); });
-  $('rc').addEventListener('input', e=>{ const p=e.target.selectionStart; e.target.value=e.target.value.toUpperCase(); e.target.setSelectionRange(p,p); });
-
-  $('btn-start').addEventListener('click',()=>sk.emit('game:start'));
-
+  // Waiting
+  $('btn-start').addEventListener('click',()=>S.socket.emit('game:start'));
   $('btn-copy').addEventListener('click',()=>{
     const c=$('rcode').textContent;
-    navigator.clipboard?.writeText(c).then(()=>{ const b=$('btn-copy');if(b){b.textContent='✓';setTimeout(()=>b.textContent='⎘',1500);} });
+    navigator.clipboard?.writeText(c).then(()=>{const b=$('btn-copy');if(b){b.textContent='✓';setTimeout(()=>b.textContent='⎘',1500);}});
   });
 
+  // Spy guess
   $('btn-spy').addEventListener('click',()=>{
-    const inp=$('spy-in'), w=inp?.value.trim(); if(!w) return;
-    sk.emit('spy:guess',{word:w}); $('btn-spy').disabled=true; inp.disabled=true;
+    const inp=$('spy-in'),w=inp?.value.trim();if(!w)return;
+    S.socket.emit('spy:guess',{word:w});$('btn-spy').disabled=true;inp.disabled=true;
   });
-  $('spy-in').addEventListener('keydown',e=>{ if(e.key==='Enter') $('btn-spy').click(); });
+  $('spy-in').addEventListener('keydown',e=>{if(e.key==='Enter')$('btn-spy').click();});
 
-  $('btn-again').addEventListener('click',()=>{ RTC.dropAll(); location.reload(); });
+  // Play again
+  $('btn-again').addEventListener('click',()=>{RTC.dropAll();location.reload();});
 }
 
 /* ── BOOT ── */
 window.addEventListener('DOMContentLoaded',()=>{
-  const sk=io({transports:['websocket','polling']});
-  S.socket=sk;
-  if(sk.id) S.myId=sk.id;
-  bindSocket(sk);
   bindButtons();
-  console.log('%cSerMakshouf 🕵️','font-size:20px;font-weight:bold;color:#d4a017;');
+
+  // لو في رابط محفوظ، اتصل فوراً
+  if(BACKEND_URL){
+    const se=$('setup-err');if(se)se.textContent='جاري إعادة الاتصال…';
+    connectToServer(BACKEND_URL);
+  } else {
+    // عرض شاشة الإعداد
+    showScreen('setup');
+  }
+
+  console.log('%cسر مكشوف 🕵️','font-size:20px;font-weight:bold;color:#d4a017;');
 });
 </script>
 </body>
