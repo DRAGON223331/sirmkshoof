@@ -217,9 +217,147 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
   .lt{font-size:40px}.cav{width:64px;height:64px;font-size:28px}.car{width:64px;height:64px}
   .vg{grid-template-columns:1fr}.vt{font-size:30px}
 }
+
+/* ══ INTRO SCREEN ══ */
+#intro-screen{
+  position:fixed;inset:0;z-index:99999;background:var(--void);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0;overflow:hidden;
+}
+#intro-screen.fade-out{animation:introFade .8s ease forwards;}
+@keyframes introFade{to{opacity:0;transform:scale(1.04);pointer-events:none;}}
+
+.intro-glitch-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 50%,rgba(212,160,23,.08) 0%,transparent 70%),
+    repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(212,160,23,.02) 3px,rgba(212,160,23,.02) 4px);
+  pointer-events:none;
+}
+.intro-corner{
+  position:absolute;width:60px;height:60px;border-color:var(--gold);border-style:solid;opacity:.35;
+}
+.intro-corner.tl{top:24px;left:24px;border-width:2px 0 0 2px;}
+.intro-corner.tr{top:24px;right:24px;border-width:2px 2px 0 0;}
+.intro-corner.bl{bottom:24px;left:24px;border-width:0 0 2px 2px;}
+.intro-corner.br{bottom:24px;right:24px;border-width:0 2px 2px 0;}
+
+.intro-tag{
+  font-family:var(--fm);font-size:10px;letter-spacing:.32em;
+  color:var(--gdim);margin-bottom:28px;
+  opacity:0;animation:introUp .6s ease .2s forwards;
+}
+.intro-logo{
+  font-family:var(--fa);font-size:clamp(52px,15vw,96px);font-weight:700;
+  color:var(--gold);line-height:1;direction:rtl;text-align:center;
+  text-shadow:0 0 60px var(--gglow),0 0 120px rgba(212,160,23,.15);
+  opacity:0;animation:introUp .7s cubic-bezier(.34,1.56,.64,1) .4s forwards;
+}
+.intro-sub{
+  font-family:var(--fm);font-size:11px;letter-spacing:.2em;
+  color:var(--lo);margin-top:16px;
+  opacity:0;animation:introUp .6s ease .65s forwards;
+}
+.intro-line{
+  width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  margin:28px 0;
+  opacity:0;animation:introUp .6s ease .8s forwards;
+}
+.intro-btn{
+  font-family:var(--fm);font-size:12px;letter-spacing:.18em;
+  color:#000;background:var(--gold);
+  border:none;border-radius:6px;padding:14px 40px;cursor:pointer;
+  box-shadow:0 4px 30px var(--gglow);
+  opacity:0;animation:introUp .6s ease 1s forwards;
+  transition:transform .15s,box-shadow .2s,opacity .15s;
+  text-transform:uppercase;
+}
+.intro-btn:hover{transform:translateY(-2px);box-shadow:0 8px 40px var(--gglow);}
+.intro-btn:active{transform:scale(.97);}
+.intro-scan{
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:.4;animation:intrScan 3s ease-in-out infinite;
+}
+@keyframes intrScan{
+  0%{top:0;opacity:.4}
+  50%{opacity:.15}
+  100%{top:100%;opacity:.4}
+}
+@keyframes introUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ══ QUESTION BUTTON & MODAL ══ */
+#q-btn{
+  position:fixed;bottom:22px;left:20px;z-index:9000;
+  width:46px;height:46px;border-radius:50%;
+  background:var(--card);border:1px solid var(--brh);
+  color:var(--gold);font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+  transition:transform .15s,box-shadow .2s,border-color .2s;
+  font-family:var(--fm);
+}
+#q-btn:hover{transform:scale(1.1);border-color:var(--gold);box-shadow:0 6px 28px var(--gglow);}
+#q-btn.pulse-once{animation:qPulse .4s ease;}
+@keyframes qPulse{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+#q-overlay{
+  position:fixed;inset:0;z-index:9500;
+  background:rgba(2,5,13,.88);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+#q-overlay.open{opacity:1;pointer-events:auto;}
+.q-modal{
+  background:var(--card);border:1px solid var(--brh);border-radius:var(--rl);
+  padding:28px 24px;max-width:420px;width:100%;
+  animation:qSlide .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes qSlide{from{transform:scale(.85) translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.q-tag{font-family:var(--fm);font-size:9px;letter-spacing:.22em;color:var(--lo);margin-bottom:16px;}
+.q-text{
+  font-family:var(--fa);font-size:18px;font-weight:600;color:var(--hi);
+  direction:rtl;line-height:1.7;margin-bottom:20px;
+  border-right:3px solid var(--gold);padding-right:14px;
+}
+.q-actions{display:flex;gap:10px;}
+.q-next{flex:1;background:var(--lift);border:1px solid var(--brh);color:var(--mid);border-radius:var(--rs);padding:10px;font-family:var(--fm);font-size:11px;letter-spacing:.1em;cursor:pointer;transition:all .15s;}
+.q-next:hover{border-color:var(--gold);color:var(--gold);}
+.q-close{background:var(--gold);border:none;color:#000;border-radius:var(--rs);padding:10px 20px;font-family:var(--fm);font-size:11px;letter-spacing:.1em;cursor:pointer;font-weight:700;transition:opacity .15s;}
+.q-close:hover{opacity:.85;}
   </style>
 </head>
 <body>
+
+<!-- ══ INTRO SCREEN ══ -->
+<div id="intro-screen">
+  <div class="intro-glitch-bg"></div>
+  <div class="intro-scan"></div>
+  <div class="intro-corner tl"></div>
+  <div class="intro-corner tr"></div>
+  <div class="intro-corner bl"></div>
+  <div class="intro-corner br"></div>
+  <div class="intro-tag">CLASSIFIED OPERATION · لعبة الجواسيس</div>
+  <div class="intro-logo">سر مكشوف</div>
+  <div class="intro-sub">VOICE-ONLY SOCIAL DEDUCTION</div>
+  <div class="intro-line"></div>
+  <button class="intro-btn" id="intro-enter-btn">ابدأ التشغيل ›</button>
+</div>
+
+<!-- ══ QUESTION BUTTON ══ -->
+<button id="q-btn" title="سؤال السيرة">❓</button>
+
+<!-- ══ QUESTION MODAL ══ -->
+<div id="q-overlay">
+  <div class="q-modal">
+    <div class="q-tag">QUESTION OF THE ROUND — سؤال الجولة</div>
+    <div id="q-text" class="q-text"></div>
+    <div class="q-actions">
+      <button class="q-next" id="q-next-btn">سؤال ثاني ›</button>
+      <button class="q-close" id="q-close-btn">تمام ✓</button>
+    </div>
+  </div>
+</div>
 
 <div id="cdot" title="جاري الاتصال..."></div>
 <div class="scanlines" aria-hidden="true"></div>
@@ -756,6 +894,8 @@ function bindButtons(){
 /* ── BOOT ── */
 window.addEventListener('DOMContentLoaded',()=>{
   bindButtons();
+  initIntro();
+  initQuestionBtn();
 
   // لو في رابط محفوظ، اتصل فوراً
   if(BACKEND_URL){
@@ -768,6 +908,71 @@ window.addEventListener('DOMContentLoaded',()=>{
 
   console.log('%cسر مكشوف 🕵️','font-size:20px;font-weight:bold;color:#d4a017;');
 });
+
+/* ── INTRO ── */
+function initIntro(){
+  const intro=$('intro-screen');
+  const btn=$('intro-enter-btn');
+  if(!intro||!btn)return;
+  btn.addEventListener('click',()=>{
+    intro.classList.add('fade-out');
+    setTimeout(()=>{intro.remove();},800);
+  });
+}
+
+/* ── QUESTION BUTTON ── */
+function initQuestionBtn(){
+  const QUESTIONS=[
+    'لو تقدر تسافر لأي مكان في العالم دلوقتي، هتروح فين؟',
+    'إيه أحسن حاجة حصلتلك الأسبوع ده؟',
+    'لو كنت فيلم، هيكون نوعه إيه؟',
+    'إيه الشيء اللي بتتكلم فيه كتير لما بتحكي عن نفسك؟',
+    'لو قدرت تتقن مهارة جديدة في يوم واحد، هتختار إيه؟',
+    'أكتر حاجة بتضحكك في الحياة اليومية إيه؟',
+    'لو كان عندك سوبر باور، هيكون إيه؟',
+    'الأكل اللي لو أكلته كل يوم مش هتملّ منه إيه؟',
+    'آخر فيلم أو مسلسل أثّر فيك؟ وليه؟',
+    'لو لقيت جنيه في الشارع، هتعمل بيه إيه؟',
+    'أحسن نصيحة اتقالتلك في حياتك؟',
+    'لو تقدر ترجع لحظة واحدة في حياتك، هترجع امتى؟',
+    'إيه الشيء اللي لو حد عرفه عنك هيتفاجأ؟',
+    'كيف تقضي وقتك لو عندك يوم إجازة كامل من غير التزامات؟',
+    'إيه أكتر حاجة بتشبه فيها نفسك في الغرفة دي؟',
+  ];
+  let lastIdx=-1;
+  const btn=$('q-btn');
+  const overlay=$('q-overlay');
+  const qtxt=$('q-text');
+  const nextBtn=$('q-next-btn');
+  const closeBtn=$('q-close-btn');
+  if(!btn||!overlay||!qtxt)return;
+
+  function pickQuestion(){
+    let idx;
+    do{idx=Math.floor(Math.random()*QUESTIONS.length);}while(idx===lastIdx&&QUESTIONS.length>1);
+    lastIdx=idx;
+    return QUESTIONS[idx];
+  }
+
+  btn.addEventListener('click',()=>{
+    qtxt.textContent=pickQuestion();
+    overlay.classList.add('open');
+    btn.classList.add('pulse-once');
+    btn.addEventListener('animationend',()=>btn.classList.remove('pulse-once'),{once:true});
+  });
+  nextBtn.addEventListener('click',()=>{
+    qtxt.style.opacity='0';
+    qtxt.style.transform='translateY(8px)';
+    qtxt.style.transition='opacity .2s,transform .2s';
+    setTimeout(()=>{
+      qtxt.textContent=pickQuestion();
+      qtxt.style.opacity='1';
+      qtxt.style.transform='none';
+    },200);
+  });
+  closeBtn.addEventListener('click',()=>overlay.classList.remove('open'));
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open');});
+}
 </script>
 </body>
 </html>
