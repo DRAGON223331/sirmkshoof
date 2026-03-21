@@ -218,6 +218,18 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
   .vg{grid-template-columns:1fr}.vt{font-size:30px}
 }
 
+/* ══ SETTINGS PANEL ══ */
+#settings-panel{background:var(--card);border:1px solid var(--brh);border-radius:var(--r);padding:16px 20px;margin-top:12px;}
+.settings-title{font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:var(--lo);margin-bottom:14px;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.settings-row:last-child{margin-bottom:0;}
+.settings-label{font-family:var(--fa);font-size:14px;color:var(--mid);direction:rtl;}
+.settings-label small{display:block;font-family:var(--fm);font-size:9px;color:var(--lo);letter-spacing:.1em;margin-top:2px;}
+.settings-ctrl{display:flex;align-items:center;gap:8px;}
+.s-btn{width:30px;height:30px;border-radius:50%;background:var(--lift);border:1px solid var(--brh);color:var(--hi);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.s-btn:hover{border-color:var(--gold);color:var(--gold);}
+.s-val{font-family:var(--fm);font-size:16px;font-weight:700;color:var(--gold);min-width:32px;text-align:center;}
+
 /* ══ INTRO SCREEN ══ */
 #intro-screen{
   position:fixed;inset:0;z-index:99999;background:var(--void);
@@ -450,6 +462,25 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
       </div>
       <button id="btn-start" class="btn btn-p" style="margin-top:auto" disabled>ابدأ المهمة</button>
       <p id="hint-start" class="sh">تحتاج على الأقل 3 لاعبين.</p>
+      <div id="settings-panel" class="hidden">
+        <div class="settings-title">GAME SETTINGS — إعدادات اللعبة (الهوست فقط)</div>
+        <div class="settings-row">
+          <div class="settings-label">عدد الجولات<small>ROUNDS</small></div>
+          <div class="settings-ctrl">
+            <button class="s-btn" id="rounds-down">−</button>
+            <span class="s-val" id="rounds-val">5</span>
+            <button class="s-btn" id="rounds-up">+</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-label">وقت الجولة (ثانية)<small>SECONDS / ROUND</small></div>
+          <div class="settings-ctrl">
+            <button class="s-btn" id="time-down">−</button>
+            <span class="s-val" id="time-val">30</span>
+            <button class="s-btn" id="time-up">+</button>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -665,7 +696,11 @@ function renderPlayers(players){
 }
 function refreshStart(n){
   const btn=$('btn-start');if(!btn)return;
-  if(S.isHost){btn.disabled=n<3;$('hint-start').style.display=n>=3?'none':'';}
+  if(S.isHost){
+    btn.disabled=n<3;
+    $('hint-start').style.display=n>=3?'none':'';
+    const sp=$('settings-panel');if(sp)sp.classList.remove('hidden');
+  }
 }
 function renderRound(d){
   const[p1,p2]=d.activePlayers;
@@ -874,7 +909,18 @@ function bindButtons(){
   $('rc').addEventListener('input',e=>{const p=e.target.selectionStart;e.target.value=e.target.value.toUpperCase();e.target.setSelectionRange(p,p);});
 
   // Waiting
-  $('btn-start').addEventListener('click',()=>S.socket.emit('game:start'));
+  $('btn-start').addEventListener('click',()=>{
+    const rounds=parseInt($('rounds-val')?.textContent||'5');
+    const roundDuration=parseInt($('time-val')?.textContent||'30');
+    S.socket.emit('game:start',{rounds,roundDuration});
+  });
+
+  // Settings controls
+  function clamp(v,min,max){return Math.min(max,Math.max(min,v));}
+  $('rounds-down')?.addEventListener('click',()=>{const el=$('rounds-val');if(el)el.textContent=clamp(parseInt(el.textContent)-1,3,10);});
+  $('rounds-up')?.addEventListener('click',()=>{const el=$('rounds-val');if(el)el.textContent=clamp(parseInt(el.textContent)+1,3,10);});
+  $('time-down')?.addEventListener('click',()=>{const el=$('time-val');if(el)el.textContent=clamp(parseInt(el.textContent)-5,20,60);});
+  $('time-up')?.addEventListener('click',()=>{const el=$('time-val');if(el)el.textContent=clamp(parseInt(el.textContent)+5,20,60);});
   $('btn-copy').addEventListener('click',()=>{
     const c=$('rcode').textContent;
     navigator.clipboard?.writeText(c).then(()=>{const b=$('btn-copy');if(b){b.textContent='✓';setTimeout(()=>b.textContent='⎘',1500);}});
