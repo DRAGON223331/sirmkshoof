@@ -62,6 +62,7 @@ class Room {
     this.word         = null;
     this.spyId        = null;
     this.totalRounds  = CONFIG.DEFAULT_ROUNDS;
+    this.roundDuration = CONFIG.ROUND_DURATION_SEC;
     this.currentRound = 0;
     this.rounds       = [];        // history of { player1, player2 }
     this.votes        = new Map(); // voterId → votedId
@@ -211,7 +212,7 @@ io.on('connection', (socket) => {
   });
 
   // ── Start Game ────────────────────────────────────────────────────────────
-  socket.on('game:start', () => {
+  socket.on('game:start', ({ rounds, roundDuration } = {}) => {
     const room = rooms.get(roomCode);
     if (!room)                             return;
     if (socket.id !== room.hostId)         return socket.emit('error', { message: 'Only the host can start.' });
@@ -219,8 +220,11 @@ io.on('connection', (socket) => {
                                            return socket.emit('error', { message: `Need at least ${CONFIG.MIN_PLAYERS} players to start.` });
     if (room.state !== 'lobby')            return;
 
-    room.state       = 'playing';
-    room.totalRounds = Math.max(CONFIG.DEFAULT_ROUNDS, room.players.size);
+    // Apply host settings
+    if (rounds && rounds >= 3 && rounds <= 10)           room.totalRounds      = rounds;
+    if (roundDuration && roundDuration >= 20 && roundDuration <= 60) room.roundDuration = roundDuration;
+
+    room.state = 'playing';
     room.assignRoles();
 
     // Send each player their secret role
@@ -357,18 +361,17 @@ function startRound(room) {
       { id: p1Id, username: p1.username },
       { id: p2Id, username: p2.username },
     ],
-    duration      : CONFIG.ROUND_DURATION_SEC,
+    duration      : room.roundDuration,
   };
 
   room.rounds.push(roundData);
   io.to(room.code).emit('round:start', roundData);
   console.log(`[Round ${room.currentRound}/${room.totalRounds}] ${p1.username} ↔ ${p2.username}  (room ${room.code})`);
 
-  // Auto-end round after duration
   room.roundTimer = setTimeout(() => {
     io.to(room.code).emit('round:end', { roundNumber: room.currentRound });
     setTimeout(() => startRound(room), CONFIG.INTER_ROUND_MS);
-  }, CONFIG.ROUND_DURATION_SEC * 1000);
+  }, room.roundDuration * 1000);
 }
 
 /** Move game into voting phase */
