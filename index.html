@@ -243,25 +243,6 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
 .s-btn:hover{border-color:var(--gold);color:var(--gold);}
 .s-val{font-family:var(--fm);font-size:16px;font-weight:700;color:var(--gold);min-width:32px;text-align:center;}
 
-/* ══ SPY MULTIPLE CHOICE ══ */
-.spy-opts{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
-.spy-opt{background:var(--lift);border:1px solid var(--brh);border-radius:var(--rs);padding:12px 16px;font-family:var(--fa);font-size:15px;color:var(--hi);direction:rtl;cursor:pointer;transition:all .15s;text-align:right;}
-.spy-opt:hover{border-color:var(--red);background:rgba(230,57,70,.08);}
-.spy-opt.selected{border-color:var(--red);background:rgba(230,57,70,.15);pointer-events:none;}
-.spy-opt:disabled{opacity:.5;cursor:not-allowed;}
-
-/* ══ SCOREBOARD ══ */
-.score-board{background:var(--card);border:1px solid var(--brh);border-radius:var(--rl);padding:16px 20px;}
-.score-title{font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:var(--lo);margin-bottom:12px;}
-.score-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--br);}
-.score-row:last-child{border-bottom:none;}
-.score-rank{font-family:var(--fm);font-size:11px;color:var(--lo);width:20px;text-align:center;flex-shrink:0;}
-.score-rank.top{color:var(--gold);}
-.score-name{font-size:14px;flex:1;direction:rtl;}
-.score-badge{font-family:var(--fm);font-size:8px;letter-spacing:.1em;padding:2px 6px;border-radius:10px;}
-.score-badge.spy{color:var(--red);background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.2);}
-.score-pts{font-family:var(--fm);font-size:14px;font-weight:700;color:var(--gold);min-width:30px;text-align:left;}
-
 /* ══ INTRO SCREEN ══ */
 #intro-screen{
   position:fixed;inset:0;z-index:99999;background:var(--void);
@@ -512,17 +493,6 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
             <button class="s-btn" id="time-up">+</button>
           </div>
         </div>
-        <div class="settings-row">
-          <div class="settings-label">نوع الكلمات<small>CATEGORY</small></div>
-          <select id="cat-val" class="fi" style="font-size:13px;padding:8px 12px;direction:rtl;">
-            <option value="عشوائي">عشوائي 🎲</option>
-            <option value="أماكن">أماكن 🏛️</option>
-            <option value="أكل">أكل 🍕</option>
-            <option value="أماكن في مصر">أماكن في مصر 🇪🇬</option>
-            <option value="بلاد">بلاد 🌍</option>
-            <option value="مواقف">مواقف 🎭</option>
-          </select>
-        </div>
       </div>
     </div>
   </section>
@@ -581,11 +551,6 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
       <div class="asl">يستمعون</div>
       <div id="aud-row" class="asr"></div>
     </div>
-    <!-- زرار تم للمتحدثين فقط -->
-    <div id="done-wrap" class="hidden" style="margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:6px;">
-      <button id="btn-done" class="btn btn-s">✓ تم — الجولة الجاية</button>
-      <div id="done-status" class="sh"></div>
-    </div>
     <div id="rnd-trans" class="rt hidden">
       <div class="rtt" id="trans-txt">انتهت الجولة</div>
       <div class="rts">الجولة التالية تبدأ قريباً…</div>
@@ -605,8 +570,11 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
     <div id="vgrid" class="vg" role="group"></div>
     <div class="vp"><span id="vcast">0</span> / <span id="vtot">0</span> صوت</div>
     <div id="spy-panel" class="sgp hidden">
-      <div class="sgt">انكشفت! اختار الكلمة السرية من الاختيارات دي:</div>
-      <div id="spy-options" class="spy-opts"></div>
+      <div class="sgt">انكشفت! خمّن الكلمة السرية لتفوز:</div>
+      <div class="sgf">
+        <input id="spy-in" type="text" class="fi" placeholder="تخمينك…" maxlength="40"/>
+        <button id="btn-spy" class="btn btn-d">إرسال</button>
+      </div>
       <div id="spy-cd" class="sgc"></div>
     </div>
     <p id="vote-err" class="err" role="alert"></p>
@@ -639,8 +607,6 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
         <div id="res-gr" class="rr hidden"><span class="rla">خمّن الجاسوس</span><span id="res-gu" class="rgu"></span></div>
         <div class="rr"><span class="rla">السبب</span><span id="res-rea" class="rre"></span></div>
       </div>
-      <!-- Scoreboard -->
-      <div id="scoreboard" style="width:100%;margin-top:4px;"></div>
       <button id="btn-again" class="btn btn-p">العب مرة أخرى</button>
     </div>
   </section>
@@ -658,7 +624,7 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
 
 /* ── CONFIG: رابط السيرفر ── */
 // هيتحدد من localStorage أو من الـ setup screen
-let BACKEND_URL = localStorage.getItem('sm_backend_url') || '';
+let BACKEND_URL = localStorage.getItem('sm_backend_url') || 'https://jasoos-production-bbfe.up.railway.app';
 
 /* ── STATE ── */
 const S={socket:null,myId:null,roomCode:'',isHost:false,role:null,word:null,players:[],totalRounds:5,voted:false};
@@ -862,31 +828,19 @@ function bindSocket(sk){
   sk.on('round:start',data=>{
     TMR.stop();S.activePair=data.activePlayers;RTC.setActive(data.activePlayers.map(p=>p.id));
     showScreen('game');renderRound(data);TMR.start(data.duration,$('tnum'),$('tarc'));
-    // Show "تم" button only to the two active speakers
-    const isActive=data.activePlayers.some(p=>p.id===S.myId);
-    const dw=$('done-wrap');if(dw){if(isActive){dw.classList.remove('hidden');dw.style.display='flex';}else{dw.classList.add('hidden');dw.style.display='none';}}
-    const db=$('btn-done');if(db){db.disabled=false;db.textContent='✓ تم — الجولة الجاية';}
-    const ds=$('done-status');if(ds)ds.textContent='';
-  });
-  sk.on('round:doneUpdate',({doneIds})=>{
-    const data=S.activePair||[];
-    const names=doneIds.map(id=>{const p=data.find(x=>x.id===id);return p?p.username:'';}).filter(Boolean);
-    const ds=$('done-status');if(ds)ds.textContent=names.length?names.join(' و ')+' ضغطوا تم…':'';
   });
   sk.on('round:end',({roundNumber})=>{
     TMR.stop();RTC.setActive([]);
     const t=$('rnd-trans'),tx=$('trans-txt');if(t)t.classList.remove('hidden');if(tx)tx.textContent='جولة '+roundNumber+' انتهت';
     const a=$('tarc');if(a)a.style.strokeDashoffset=0;
-    const dw=$('done-wrap');if(dw){dw.classList.add('hidden');dw.style.display='none';}
   });
   sk.on('vote:start',({players,duration})=>{
     TMR.stop();S.voted=false;showScreen('voting');
     renderVotes(players,id=>sk.emit('vote:cast',{votedId:id}));
     TMR.start(duration,$('vtnum'),null);
     const p=$('spy-panel');if(p)p.classList.add('hidden');
+    const si=$('spy-in'),sb=$('btn-spy');if(si){si.value='';si.disabled=false;}if(sb)sb.disabled=false;
     $('vcast').textContent='0';
-    // Voting phase: everyone can talk
-    RTC.setActive(players.map(p=>p.id));
   });
   sk.on('vote:update',({voteCounts,totalVotes})=>{
     Object.entries(voteCounts).forEach(([id,n])=>{const el=$('vc-'+id);if(el)el.textContent=n+(n===1?' صوت':' أصوات');});
@@ -896,8 +850,10 @@ function bindSocket(sk){
     TMR.stop();
     if(data.isSpy&&S.myId===data.spyId){
       showScreen('voting');
-      // Spy sees their panel with options (via spy:guessChance)
+      const p=$('spy-panel');if(p)p.classList.remove('hidden');
       const g=$('vgrid');if(g)g.style.pointerEvents='none';
+      let n=20;const cd=$('spy-cd');if(cd)cd.textContent=n+'ث';
+      const t=setInterval(()=>{n--;if(cd)cd.textContent=Math.max(0,n)+'ث';if(n<=0)clearInterval(t);},1000);
     } else {
       showScreen('vote-result');
       const ico=$('vr-ico'),hd=$('vr-head'),sub=$('vr-sub');
@@ -905,7 +861,7 @@ function bindSocket(sk){
         if(ico)ico.textContent='🎯';
         if(hd){hd.textContent=data.mostVotedName+' هو الجاسوس!';hd.style.color='var(--red)';}
         if(sub)sub.textContent='صح! هل يستطيع تخمين الكلمة السرية؟';
-        const aw=$('spy-await');if(aw){aw.classList.remove('hidden');let n=25;const gc=$('ga-cd');if(gc)gc.textContent=' ('+n+'ث)';const t=setInterval(()=>{n--;if(gc)gc.textContent=' ('+Math.max(0,n)+'ث)';if(n<=0)clearInterval(t);},1000);}
+        const aw=$('spy-await');if(aw){aw.classList.remove('hidden');let n=20;const gc=$('ga-cd');if(gc)gc.textContent=' ('+n+'ث)';const t=setInterval(()=>{n--;if(gc)gc.textContent=' ('+Math.max(0,n)+'ث)';if(n<=0)clearInterval(t);},1000);}
       } else {
         if(ico)ico.textContent='😱';
         if(hd){hd.textContent=data.mostVotedName+' بريء!';hd.style.color='var(--blue)';}
@@ -913,31 +869,7 @@ function bindSocket(sk){
       }
     }
   });
-  sk.on('spy:guessChance',({spyId,options})=>{
-    if(S.myId===spyId){
-      showScreen('voting');
-      const p=$('spy-panel');if(p)p.classList.remove('hidden');
-      const g=$('vgrid');if(g)g.style.pointerEvents='none';
-      // Build multiple choice buttons
-      const so=$('spy-options');
-      if(so&&options){
-        so.innerHTML='';
-        options.forEach(opt=>{
-          const btn=document.createElement('button');
-          btn.className='spy-opt';btn.textContent=opt;
-          btn.addEventListener('click',()=>{
-            so.querySelectorAll('.spy-opt').forEach(b=>{b.disabled=true;});
-            btn.classList.add('selected');
-            sk.emit('spy:guess',{word:opt});
-          });
-          so.appendChild(btn);
-        });
-      }
-      // Countdown
-      let n=25;const cd=$('spy-cd');if(cd)cd.textContent=n+'ث';
-      const t=setInterval(()=>{n--;if(cd)cd.textContent=Math.max(0,n)+'ث';if(n<=0)clearInterval(t);},1000);
-    }
-  });
+  sk.on('spy:guessChance',({spyId})=>{if(S.myId===spyId){showScreen('voting');const p=$('spy-panel');if(p)p.classList.remove('hidden');}});
   sk.on('game:result',data=>{
     TMR.stop();RTC.dropAll();showScreen('results');
     const bg=$('res-bg'),tr=$('res-tro'),wn=$('res-win'),hd=$('res-hed');
@@ -948,19 +880,6 @@ function bindSocket(sk){
     const gr=$('res-gr'),rg=$('res-gu');
     if(data.spyGuess){if(gr)gr.classList.remove('hidden');if(rg){rg.textContent='"'+data.spyGuess+'" — '+(data.correct?'✅ صح!':'❌ غلط');rg.style.color=data.correct?'var(--green)':'var(--red)';}}
     else if(gr)gr.classList.add('hidden');
-    // Scoreboard
-    if(data.scores&&data.scores.length){
-      const sb=$('scoreboard');
-      if(sb){
-        const medals=['🥇','🥈','🥉'];
-        sb.innerHTML='<div class="score-board"><div class="score-title">SCORES — النتيجة</div>'+
-          data.scores.map((p,i)=>`<div class="score-row">
-            <span class="score-rank ${i<3?'top':''}">${medals[i]||i+1}</span>
-            <span class="score-name">${esc(p.username)}${p.isSpy?'<span class="score-badge spy" style="margin-right:6px">جاسوس</span>':''}</span>
-            <span class="score-pts">${p.score} نقطة</span>
-          </div>`).join('')+'</div>';
-      }
-    }
   });
   sk.on('game:aborted',({reason})=>{TMR.stop();RTC.dropAll();alert('انتهت اللعبة: '+reason);location.reload();});
   sk.on('error',({message})=>{
@@ -1006,8 +925,7 @@ function bindButtons(){
   $('btn-start').addEventListener('click',()=>{
     const rounds=parseInt($('rounds-val')?.textContent||'5');
     const roundDuration=parseInt($('time-val')?.textContent||'30');
-    const category=$('cat-val')?.value||'عشوائي';
-    S.socket.emit('game:start',{rounds,roundDuration,category});
+    S.socket.emit('game:start',{rounds,roundDuration});
   });
 
   // Settings controls
@@ -1021,14 +939,12 @@ function bindButtons(){
     navigator.clipboard?.writeText(c).then(()=>{const b=$('btn-copy');if(b){b.textContent='✓';setTimeout(()=>b.textContent='⎘',1500);}});
   });
 
-  // Spy guess (now just emits selected word)
-  // handled dynamically in spy option buttons
-
-  // Done button (skip round)
-  $('btn-done')?.addEventListener('click',()=>{
-    S.socket.emit('round:done');
-    const btn=$('btn-done');if(btn){btn.disabled=true;btn.textContent='✓ انتظر الثاني…';}
+  // Spy guess
+  $('btn-spy').addEventListener('click',()=>{
+    const inp=$('spy-in'),w=inp?.value.trim();if(!w)return;
+    S.socket.emit('spy:guess',{word:w});$('btn-spy').disabled=true;inp.disabled=true;
   });
+  $('spy-in').addEventListener('keydown',e=>{if(e.key==='Enter')$('btn-spy').click();});
 
   // Play again
   $('btn-again').addEventListener('click',()=>{RTC.dropAll();location.reload();});
