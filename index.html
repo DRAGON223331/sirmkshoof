@@ -350,6 +350,70 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
 .q-next:hover{border-color:var(--gold);color:var(--gold);}
 .q-close{background:var(--gold);border:none;color:#000;border-radius:var(--rs);padding:10px 20px;font-family:var(--fm);font-size:11px;letter-spacing:.1em;cursor:pointer;font-weight:700;transition:opacity .15s;}
 .q-close:hover{opacity:.85;}
+/* ══ CHAT ══ */
+#chat-btn{
+  position:fixed;bottom:22px;right:70px;z-index:9000;
+  width:46px;height:46px;border-radius:50%;
+  background:var(--card);border:1px solid var(--brh);
+  color:var(--blue);font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+  transition:transform .15s,box-shadow .2s,border-color .2s;
+}
+#chat-btn:hover{transform:scale(1.1);border-color:var(--blue);box-shadow:0 6px 28px var(--bglow);}
+#chat-badge{
+  position:absolute;top:-4px;right:-4px;
+  background:var(--red);color:#fff;font-family:var(--fm);font-size:9px;
+  width:16px;height:16px;border-radius:50%;display:none;
+  align-items:center;justify-content:center;font-weight:700;
+}
+#chat-panel{
+  position:fixed;bottom:80px;right:12px;z-index:9200;
+  width:min(320px,calc(100vw - 24px));
+  background:var(--card);border:1px solid var(--brh);border-radius:var(--rl);
+  display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,.5);
+  opacity:0;pointer-events:none;transform:translateY(12px);
+  transition:opacity .25s,transform .25s;
+}
+#chat-panel.open{opacity:1;pointer-events:auto;transform:none;}
+.chat-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-bottom:1px solid var(--br);
+  font-family:var(--fm);font-size:10px;letter-spacing:.16em;color:var(--lo);
+}
+.chat-close{background:none;border:none;color:var(--lo);font-size:16px;cursor:pointer;padding:0;}
+.chat-close:hover{color:var(--hi);}
+#chat-msgs{
+  flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;
+  max-height:280px;min-height:120px;
+}
+#chat-msgs::-webkit-scrollbar{width:3px;}
+#chat-msgs::-webkit-scrollbar-thumb{background:var(--brh);border-radius:2px;}
+.chat-msg{display:flex;flex-direction:column;gap:2px;}
+.chat-msg.me{align-items:flex-end;}
+.chat-msg.me .chat-bubble{background:rgba(212,160,23,.15);border-color:rgba(212,160,23,.25);}
+.chat-name{font-family:var(--fm);font-size:9px;color:var(--lo);letter-spacing:.08em;}
+.chat-bubble{
+  background:var(--lift);border:1px solid var(--br);border-radius:10px;
+  padding:7px 11px;font-size:14px;color:var(--hi);
+  font-family:var(--fa);direction:rtl;max-width:220px;word-break:break-word;line-height:1.5;
+}
+.chat-sys{font-family:var(--fm);font-size:10px;color:var(--lo);text-align:center;letter-spacing:.08em;}
+.chat-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--br);}
+#chat-input{
+  flex:1;background:var(--inp);border:1px solid var(--brh);border-radius:var(--rs);
+  color:var(--hi);font-family:var(--fa);font-size:14px;padding:8px 12px;outline:none;
+  direction:rtl;transition:border-color .2s;
+}
+#chat-input:focus{border-color:var(--blue);}
+#chat-input::placeholder{color:var(--lo);}
+#chat-send{
+  background:var(--blue);border:none;border-radius:var(--rs);
+  color:#000;font-family:var(--fm);font-size:12px;padding:8px 14px;cursor:pointer;
+  font-weight:700;transition:opacity .15s;flex-shrink:0;
+}
+#chat-send:hover{opacity:.85;}
   </style>
 </head>
 <body>
@@ -370,6 +434,23 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
 </div>
 
 <!-- ══ QUESTION BUTTON ══ -->
+<!-- ══ CHAT ══ -->
+<button id="chat-btn" title="الشات">
+  💬
+  <span id="chat-badge"></span>
+</button>
+<div id="chat-panel">
+  <div class="chat-header">
+    <span>CHAT — الشات</span>
+    <button class="chat-close" id="chat-close-btn">✕</button>
+  </div>
+  <div id="chat-msgs"></div>
+  <div class="chat-input-row">
+    <button id="chat-send">إرسال</button>
+    <input id="chat-input" type="text" placeholder="اكتب رسالة…" maxlength="200" autocomplete="off"/>
+  </div>
+</div>
+
 <button id="q-btn" title="سؤال السيرة">❓</button>
 
 <!-- ══ QUESTION MODAL ══ -->
@@ -624,7 +705,7 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
 
 /* ── CONFIG: رابط السيرفر ── */
 // هيتحدد من localStorage أو من الـ setup screen
-let BACKEND_URL = localStorage.getItem('sm_backend_url') || 'https://jasoos-production-bbfe.up.railway.app';
+let BACKEND_URL = localStorage.getItem('sm_backend_url') || '';
 
 /* ── STATE ── */
 const S={socket:null,myId:null,roomCode:'',isHost:false,role:null,word:null,players:[],totalRounds:5,voted:false};
@@ -882,6 +963,7 @@ function bindSocket(sk){
     else if(gr)gr.classList.add('hidden');
   });
   sk.on('game:aborted',({reason})=>{TMR.stop();RTC.dropAll();alert('انتهت اللعبة: '+reason);location.reload();});
+  sk.on('chat:msg',(data)=>{if(window._chatOnMsg)window._chatOnMsg(data);});
   sk.on('error',({message})=>{
     const a=document.querySelector('.screen.active');
     const id=a?a.id.replace('screen-',''):'lobby';
@@ -953,6 +1035,7 @@ function bindButtons(){
 /* ── BOOT ── */
 window.addEventListener('DOMContentLoaded',()=>{
   bindButtons();
+  initChat();
   initIntro();
   initQuestionBtn();
 
@@ -979,7 +1062,69 @@ function initIntro(){
   });
 }
 
-/* ── QUESTION BUTTON ── */
+/* ── CHAT ── */
+function initChat(){
+  const btn=$('chat-btn');
+  const panel=$('chat-panel');
+  const closeBtn=$('chat-close-btn');
+  const msgs=$('chat-msgs');
+  const input=$('chat-input');
+  const send=$('chat-send');
+  const badge=$('chat-badge');
+  if(!btn||!panel)return;
+
+  let unread=0;
+  let open=false;
+
+  function togglePanel(){
+    open=!open;
+    panel.classList.toggle('open',open);
+    if(open){
+      unread=0;badge.style.display='none';badge.textContent='';
+      setTimeout(()=>msgs.scrollTop=msgs.scrollHeight,50);
+      input.focus();
+    }
+  }
+
+  btn.addEventListener('click',togglePanel);
+  closeBtn.addEventListener('click',()=>{open=true;togglePanel();});
+
+  function sendMsg(){
+    const txt=input.value.trim();
+    if(!txt||!S.socket)return;
+    S.socket.emit('chat:msg',{text:txt});
+    input.value='';
+  }
+  send.addEventListener('click',sendMsg);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
+
+  // Receive messages
+  function onChatMsg({id,username,text}){
+    const isMe=id===S.myId;
+    const div=document.createElement('div');
+    div.className='chat-msg'+(isMe?' me':'');
+    div.innerHTML=`${!isMe?`<span class="chat-name">${esc(username)}</span>`:''}
+      <div class="chat-bubble">${esc(text)}</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop=msgs.scrollHeight;
+    if(!open){
+      unread++;
+      badge.textContent=unread>9?'9+':unread;
+      badge.style.display='flex';
+    }
+  }
+
+  function addSysMsg(txt){
+    const div=document.createElement('div');
+    div.className='chat-sys';div.textContent=txt;
+    msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+  }
+
+  // Expose for socket binding
+  window._chatOnMsg=onChatMsg;
+  window._chatSysMsg=addSysMsg;
+}
+
 function initQuestionBtn(){
   const QUESTIONS=[
     'لو تقدر تسافر لأي مكان في العالم دلوقتي، هتروح فين؟',
