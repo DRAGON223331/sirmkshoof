@@ -392,6 +392,51 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
   cursor:pointer;font-weight:700;transition:opacity .15s;flex-shrink:0;
 }
 .chat-send-btn:hover{opacity:.85;}
+
+/* ══ SEAT CHAT (يظهر بس لما يجي دورك) ══ */
+#seat-chat{
+  margin-top:10px;
+  background:rgba(212,160,23,.06);
+  border:1px solid rgba(212,160,23,.25);
+  border-radius:var(--r);overflow:hidden;
+  display:none;
+  animation:sli .25s ease;
+}
+#seat-chat.visible{display:flex;flex-direction:column;}
+.seat-chat-title{
+  font-family:var(--fm);font-size:9px;letter-spacing:.18em;
+  color:var(--gold);padding:7px 14px;
+  border-bottom:1px solid rgba(212,160,23,.15);
+  display:flex;align-items:center;gap:6px;
+}
+.seat-chat-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:lp 1.2s ease-in-out infinite;}
+#seat-msgs{
+  display:flex;flex-direction:column;gap:6px;
+  padding:10px 12px;max-height:120px;overflow-y:auto;min-height:44px;
+}
+#seat-msgs::-webkit-scrollbar{width:3px;}
+#seat-msgs::-webkit-scrollbar-thumb{background:rgba(212,160,23,.2);border-radius:2px;}
+.seat-bubble{
+  background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.2);border-radius:8px;
+  padding:6px 10px;font-size:13px;color:var(--hi);
+  font-family:var(--fa);direction:rtl;max-width:85%;word-break:break-word;line-height:1.5;
+}
+.seat-bubble.other{background:var(--lift);border-color:var(--br);}
+.seat-name{font-family:var(--fm);font-size:9px;color:var(--gdim);padding:0 4px;}
+.seat-input-row{display:flex;gap:6px;padding:8px 10px;border-top:1px solid rgba(212,160,23,.15);}
+#seat-input{
+  flex:1;background:var(--inp);border:1px solid rgba(212,160,23,.2);border-radius:var(--rs);
+  color:var(--hi);font-family:var(--fa);font-size:13px;padding:7px 10px;
+  outline:none;direction:rtl;transition:border-color .2s;
+}
+#seat-input:focus{border-color:var(--gold);}
+#seat-input::placeholder{color:var(--lo);}
+#seat-send{
+  background:var(--gold);border:none;border-radius:var(--rs);
+  color:#000;font-family:var(--fm);font-size:10px;padding:7px 12px;
+  cursor:pointer;font-weight:700;transition:opacity .15s;flex-shrink:0;
+}
+#seat-send:hover{opacity:.85;}
   </style>
 </head>
 <body>
@@ -509,6 +554,15 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
       <div class="st">العملاء في الميدان <span id="pcnt" class="pc">0/8</span></div>
       <ul id="plist" class="pl" aria-live="polite"></ul>
       <p class="whi">شارك الكود مع زملائك ليدخلوا اللعبة.</p>
+      <!-- شات عام - ثابت -->
+      <div class="inline-chat" style="margin-top:12px;">
+        <div class="inline-chat-title">💬 CHAT — الشات</div>
+        <div class="inline-chat-msgs" id="chat-msgs-waiting"></div>
+        <div class="inline-chat-input-row">
+          <button class="chat-send-btn" id="chat-send-waiting">إرسال</button>
+          <input class="chat-fi" id="chat-input-waiting" type="text" placeholder="اكتب رسالة…" maxlength="200" autocomplete="off" dir="rtl"/>
+        </div>
+      </div>
       <div id="micp" class="mp hidden">
         <div class="mpi">🎙</div>
         <p class="mpt">اللعبة محتاجة إذن الميكروفون.</p>
@@ -593,12 +647,25 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
       <div class="asl">يستمعون</div>
       <div id="aud-row" class="asr"></div>
     </div>
-    <div class="inline-chat">
-      <div class="inline-chat-title">💬 CHAT</div>
-      <div class="inline-chat-msgs" id="chat-msgs"></div>
+    <!-- شات الكرسي — يظهر بس لما يجي دورك -->
+    <div id="seat-chat">
+      <div class="seat-chat-title">
+        <span class="seat-chat-dot"></span>
+        🎙 شات الكرسي — أنت في الهوا
+      </div>
+      <div id="seat-msgs"></div>
+      <div class="seat-input-row">
+        <button id="seat-send">إرسال</button>
+        <input id="seat-input" type="text" placeholder="اكتب لزميلك في الكرسي…" maxlength="200" autocomplete="off" dir="rtl"/>
+      </div>
+    </div>
+    <!-- شات عام ثابت - بدون input، بيتحدث من الانتظار -->
+    <div class="inline-chat" style="margin-top:10px;">
+      <div class="inline-chat-title">💬 CHAT — الشات العام</div>
+      <div class="inline-chat-msgs" id="chat-msgs-game"></div>
       <div class="inline-chat-input-row">
-        <button class="chat-send-btn" id="chat-send">إرسال</button>
-        <input class="chat-fi" id="chat-input" type="text" placeholder="اكتب رسالة…" maxlength="200" autocomplete="off" dir="rtl"/>
+        <button class="chat-send-btn" id="chat-send-game">إرسال</button>
+        <input class="chat-fi" id="chat-input-game" type="text" placeholder="اكتب رسالة…" maxlength="200" autocomplete="off" dir="rtl"/>
       </div>
     </div>
     <div id="rnd-trans" class="rt hidden">
@@ -878,9 +945,13 @@ function bindSocket(sk){
   sk.on('round:start',data=>{
     TMR.stop();S.activePair=data.activePlayers;RTC.setActive(data.activePlayers.map(p=>p.id));
     showScreen('game');renderRound(data);TMR.start(data.duration,$('tnum'),$('tarc'));
+    // شات الكرسي — يظهر بس للـ 2 اللي دورهم
+    const isActive=data.activePlayers.some(p=>p.id===S.myId);
+    setSeatChat(isActive);
   });
   sk.on('round:end',({roundNumber})=>{
     TMR.stop();RTC.setActive([]);
+    setSeatChat(false);
     const t=$('rnd-trans'),tx=$('trans-txt');if(t)t.classList.remove('hidden');if(tx)tx.textContent='جولة '+roundNumber+' انتهت';
     const a=$('tarc');if(a)a.style.strokeDashoffset=0;
   });
@@ -932,7 +1003,13 @@ function bindSocket(sk){
     else if(gr)gr.classList.add('hidden');
   });
   sk.on('game:aborted',({reason})=>{TMR.stop();RTC.dropAll();alert('انتهت اللعبة: '+reason);location.reload();});
-  sk.on('chat:msg',(data)=>{ appendChatMsg(data); });
+  sk.on('chat:msg',(data)=>{
+    // اكتب في الشات العام في الشاشتين
+    appendChatMsg(data, GENERAL_CHAT_BOXES);
+    // لو الشات الكرسي شغال، اكتب فيه برضو
+    const sc=$('seat-chat');
+    if(sc&&sc.classList.contains('visible')) appendChatMsg(data,['seat-msgs']);
+  });
   sk.on('error',({message})=>{
     const a=document.querySelector('.screen.active');
     const id=a?a.id.replace('screen-',''):'lobby';
@@ -1085,38 +1162,79 @@ function initQuestionBtn(){
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open');});
 }
 
-/* ── INLINE CHAT ── */
-function appendChatMsg({id, username, text}) {
+/* ── CHAT ── */
+// كل الـ boxes اللي بتاخد الرسايل العامة
+const GENERAL_CHAT_BOXES = ['chat-msgs-waiting','chat-msgs-game'];
+
+function appendChatMsg({id, username, text}, boxes) {
   const isMe = id === S.myId;
-  const box = $('chat-msgs');
-  if (!box) return;
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'display:flex;flex-direction:column;gap:2px;margin-bottom:4px;' + (isMe ? 'align-items:flex-end;' : 'align-items:flex-start;');
-  if (!isMe) {
-    const name = document.createElement('span');
-    name.style.cssText = 'font-family:var(--fm);font-size:9px;color:var(--lo);letter-spacing:.08em;padding:0 4px;';
-    name.textContent = username;
-    wrap.appendChild(name);
-  }
-  const bubble = document.createElement('div');
-  bubble.style.cssText = 'background:' + (isMe ? 'rgba(212,160,23,.15);border:1px solid rgba(212,160,23,.25)' : 'var(--lift);border:1px solid var(--br)') + ';border-radius:10px;padding:6px 11px;font-size:14px;color:var(--hi);font-family:var(--fa);direction:rtl;max-width:85%;word-break:break-word;line-height:1.5;';
-  bubble.textContent = text;
-  wrap.appendChild(bubble);
-  box.appendChild(wrap);
-  box.scrollTop = box.scrollHeight;
+  const targets = boxes || GENERAL_CHAT_BOXES;
+  targets.forEach(boxId => {
+    const box = $(boxId);
+    if (!box) return;
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;gap:2px;margin-bottom:4px;' + (isMe ? 'align-items:flex-end;' : 'align-items:flex-start;');
+    if (!isMe) {
+      const name = document.createElement('span');
+      name.style.cssText = 'font-family:var(--fm);font-size:9px;color:var(--lo);letter-spacing:.08em;padding:0 4px;';
+      name.textContent = username;
+      wrap.appendChild(name);
+    }
+    const bubble = document.createElement('div');
+    const isSeat = boxId === 'seat-msgs';
+    bubble.style.cssText = isSeat
+      ? 'background:' + (isMe ? 'rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.35)' : 'var(--lift);border:1px solid var(--br)') + ';border-radius:10px;padding:6px 11px;font-size:14px;color:var(--hi);font-family:var(--fa);direction:rtl;max-width:85%;word-break:break-word;line-height:1.5;'
+      : 'background:' + (isMe ? 'rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.2)' : 'var(--lift);border:1px solid var(--br)') + ';border-radius:10px;padding:6px 11px;font-size:13px;color:var(--hi);font-family:var(--fa);direction:rtl;max-width:85%;word-break:break-word;line-height:1.5;';
+    bubble.textContent = text;
+    wrap.appendChild(bubble);
+    box.appendChild(wrap);
+    box.scrollTop = box.scrollHeight;
+  });
 }
 
 function initInlineChat() {
-  function send() {
-    const inp = $('chat-input');
+  // دالة الإرسال
+  function sendChat(inputId) {
+    const inp = $(inputId);
     if (!inp) return;
     const txt = inp.value.trim();
     if (!txt || !S.socket) return;
     S.socket.emit('chat:msg', { text: txt });
     inp.value = '';
   }
-  $('chat-send')?.addEventListener('click', send);
-  $('chat-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+
+  // شات الانتظار
+  $('chat-send-waiting')?.addEventListener('click', () => sendChat('chat-input-waiting'));
+  $('chat-input-waiting')?.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat('chat-input-waiting'); });
+
+  // شات اللعبة العام
+  $('chat-send-game')?.addEventListener('click', () => sendChat('chat-input-game'));
+  $('chat-input-game')?.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat('chat-input-game'); });
+
+  // شات الكرسي
+  $('seat-send')?.addEventListener('click', () => {
+    const inp = $('seat-input');
+    if (!inp) return;
+    const txt = inp.value.trim();
+    if (!txt || !S.socket) return;
+    S.socket.emit('chat:msg', { text: txt });
+    inp.value = '';
+  });
+  $('seat-input')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') $('seat-send')?.click();
+  });
+}
+
+// تظهر/تخفي شات الكرسي
+function setSeatChat(visible) {
+  const sc = $('seat-chat');
+  if (!sc) return;
+  if (visible) {
+    sc.classList.add('visible');
+    $('seat-msgs').innerHTML = ''; // تمسح رسايل الجولة السابقة
+  } else {
+    sc.classList.remove('visible');
+  }
 }
 </script>
 </body>
