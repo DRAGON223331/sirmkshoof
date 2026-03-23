@@ -741,7 +741,7 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
 
 /* ── CONFIG: رابط السيرفر ── */
 // هيتحدد من localStorage أو من الـ setup screen
-let BACKEND_URL = localStorage.getItem('sm_backend_url') || '';
+let BACKEND_URL = localStorage.getItem('sm_backend_url') || 'https://jasoos-production-bbfe.up.railway.app';
 
 /* ── STATE ── */
 const S={socket:null,myId:null,roomCode:'',isHost:false,role:null,word:null,players:[],totalRounds:5,voted:false};
