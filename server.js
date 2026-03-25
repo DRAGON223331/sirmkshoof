@@ -211,7 +211,7 @@ io.on('connection', (socket) => {
     socket.to(code).emit('room:playerJoined', {
       player  : { id: socket.id, username: username.trim(), isHost: false },
       players : room.getPlayerList(),
-      newPeerId: socket.id,  // existing players should open a connection to this ID
+      newPeerId: socket.id,
     });
 
     console.log(`[R] "${username}" joined room ${code} (${room.players.size} players)`);

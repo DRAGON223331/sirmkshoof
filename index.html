@@ -245,6 +245,15 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
 .lv-vs{font-family:var(--fd);font-size:20px;color:var(--lo);flex-shrink:0;}
 .lv-hint{font-family:var(--fm);font-size:9px;color:var(--lo);letter-spacing:.1em;text-align:center;}
 
+/* ══ TOAST NOTIFICATIONS ══ */
+#toast-wrap{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:99998;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;width:calc(100% - 40px);max-width:360px;}
+.toast{background:var(--card);border:1px solid var(--br);border-radius:var(--rs);padding:9px 16px;font-family:var(--fm);font-size:11px;letter-spacing:.08em;color:var(--hi);display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:toastIn .3s cubic-bezier(.34,1.56,.64,1) both;white-space:nowrap;}
+.toast.out{animation:toastOut .3s ease forwards;}
+.toast-join{border-color:rgba(45,199,138,.35);background:rgba(45,199,138,.08);}
+.toast-leave{border-color:rgba(230,57,70,.3);background:rgba(230,57,70,.06);}
+@keyframes toastIn{from{opacity:0;transform:translateY(-12px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(-8px);}}
+
 /* ══ SETTINGS PANEL ══ */
 #settings-panel{background:var(--card);border:1px solid var(--brh);border-radius:var(--r);padding:16px 20px;margin-top:12px;}
 .settings-title{font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:var(--lo);margin-bottom:14px;}
@@ -487,6 +496,7 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
 
 <div id="cdot" title="جاري الاتصال..."></div>
 <div class="scanlines" aria-hidden="true"></div>
+<div id="toast-wrap" aria-live="polite"></div>
 
 <div id="app">
 
@@ -822,10 +832,32 @@ const TMR=(()=>{
 /* ── WEBRTC ── */
 const RTC=(()=>{
   const peers=new Map(),pend=new Map();let ls=null;
+  let audioCtxUnlocked=false;
   const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
+
+  // iOS Safari requires AudioContext to be resumed after a user gesture
+  function unlockAudio(){
+    if(audioCtxUnlocked)return;
+    try{
+      const ctx=new (window.AudioContext||window.webkitAudioContext)();
+      const buf=ctx.createBuffer(1,1,22050);
+      const src=ctx.createBufferSource();src.buffer=buf;
+      src.connect(ctx.destination);src.start(0);
+      ctx.resume().then(()=>{audioCtxUnlocked=true;});
+    }catch(_){}
+  }
+  // Call once on first user tap
+  document.addEventListener('touchstart',unlockAudio,{once:true,passive:true});
+  document.addEventListener('click',unlockAudio,{once:true,passive:true});
+
   async function getMic(){
-    try{ls=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});mute(true);return true;}
-    catch(e){console.warn('[RTC]',e);return false;}
+    try{
+      // iOS requires explicit constraints — no 'advanced'
+      const constraints={audio:{echoCancellation:true,noiseSuppression:true,sampleRate:48000},video:false};
+      ls=await navigator.mediaDevices.getUserMedia(constraints);
+      mute(true);
+      return true;
+    }catch(e){console.warn('[RTC getMic]',e);return false;}
   }
   function mute(m){if(ls)ls.getAudioTracks().forEach(t=>t.enabled=!m);}
   function setActive(ids){const sp=ids.includes(S.myId);mute(!sp);return sp;}
@@ -853,11 +885,38 @@ const RTC=(()=>{
     try{await pc.addIceCandidate(new RTCIceCandidate(c));}catch(_){}
   }
   async function flush(id,pc){for(const c of(pend.get(id)||[])){try{await pc.addIceCandidate(new RTCIceCandidate(c));}catch(_){}}pend.delete(id);}
-  function play(id,stream){let a=$('aud-'+id);if(!a){a=document.createElement('audio');a.id='aud-'+id;a.autoplay=true;a.playsInline=true;$('audio-box').appendChild(a);}a.srcObject=stream;}
+  function play(id,stream){
+    let a=$('aud-'+id);
+    if(!a){
+      a=document.createElement('audio');
+      a.id='aud-'+id;
+      a.autoplay=true;
+      a.playsInline=true;
+      a.setAttribute('playsinline','');       // iOS attr
+      a.setAttribute('webkit-playsinline',''); // older iOS
+      $('audio-box').appendChild(a);
+    }
+    a.srcObject=stream;
+    // iOS Safari needs explicit .play() after srcObject set
+    a.play().catch(e=>console.warn('[RTC play]',e));
+  }
   function drop(id){const pc=peers.get(id);if(pc){pc.close();peers.delete(id);}pend.delete(id);const a=$('aud-'+id);if(a)a.remove();}
-  function dropAll(){peers.forEach((_,id)=>drop(id));if(ls){ls.getTracks().forEach(t=>t.stop());ls=null;}}
+  function dropAll(){peers.forEach((_,id)=>drop(id));if(ls){ls.getTracks().forEach(t=>t.stop());ls=null;}audioCtxUnlocked=false;}
   return{getMic,setActive,setLobbyActive,connect,onOffer,onAnswer,onIce,drop,dropAll};
 })();
+
+/* ── TOAST ── */
+function showToast(msg, type='join'){
+  const wrap=$('toast-wrap');if(!wrap)return;
+  const t=document.createElement('div');
+  t.className='toast toast-'+type;
+  t.innerHTML=(type==='join'?'<span style="color:var(--green)">●</span>':'<span style="color:var(--red)">●</span>')+' '+esc(msg);
+  wrap.appendChild(t);
+  setTimeout(()=>{
+    t.classList.add('out');
+    setTimeout(()=>t.remove(),300);
+  },3000);
+}
 
 /* ── UI HELPERS ── */
 function renderPlayers(players){
@@ -865,10 +924,23 @@ function renderPlayers(players){
   list.innerHTML='';
   players.forEach(p=>{
     const li=document.createElement('li');li.className='pi';
+    li.id='pi-'+p.id;
     li.innerHTML=`<div class="pa" style="color:${col(p.id)}">${ini(p.username)}</div><span class="pn">${esc(p.username)}</span>${p.isHost?'<span class="hb">HOST</span>':''}${p.id===S.myId?'<span class="yb">أنت</span>':''}`;
     list.appendChild(li);
   });
   const b=$('pcnt');if(b)b.textContent=players.length+'/8';
+}
+function addPlayerRow(player){
+  const list=$('plist');if(!list)return;
+  if($('pi-'+player.id))return; // already exists
+  const li=document.createElement('li');li.className='pi';li.id='pi-'+player.id;
+  li.innerHTML=`<div class="pa" style="color:${col(player.id)}">${ini(player.username)}</div><span class="pn">${esc(player.username)}</span>${player.isHost?'<span class="hb">HOST</span>':''}`;
+  list.appendChild(li);
+  const b=$('pcnt');if(b)b.textContent=list.children.length+'/8';
+}
+function removePlayerRow(playerId){
+  const li=$('pi-'+playerId);
+  if(li){li.style.animation='sli .25s ease reverse';setTimeout(()=>li.remove(),220);}
 }
 function refreshStart(n){
   const btn=$('btn-start');if(!btn)return;
@@ -910,16 +982,34 @@ function renderVotes(players,onVote){
 /* ── MIC SETUP ── */
 async function setupMic(){
   const mp=$('micp'),ms=$('micst');
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  // iOS Safari doesn't support permissions.query for microphone → always show button
   let granted=false;
-  try{const r=await navigator.permissions.query({name:'microphone'});granted=r.state==='granted';}catch(_){}
-  if(granted){const ok=await RTC.getMic();if(ok&&ms){ms.style.color='var(--green)';ms.textContent='✓ الميكروفون جاهز';}return;}
+  if(!isIOS){
+    try{const r=await navigator.permissions.query({name:'microphone'});granted=r.state==='granted';}catch(_){}
+  }
+
+  if(granted){
+    const ok=await RTC.getMic();
+    if(ok&&ms){ms.style.color='var(--green)';ms.textContent='✓ الميكروفون جاهز';}
+    return;
+  }
+
+  // Show mic button (required on mobile for user-gesture unlock)
   if(mp)mp.classList.remove('hidden');
   const mb=$('btn-mic');
-  if(mb)mb.addEventListener('click',async()=>{
+  if(!mb)return;
+  mb.addEventListener('click',async()=>{
     mb.disabled=true;mb.textContent='جاري الطلب…';
     const ok=await RTC.getMic();
-    if(ok){if(ms){ms.style.color='var(--green)';ms.textContent='✓ الميكروفون جاهز';}setTimeout(()=>{if(mp)mp.classList.add('hidden');},1500);}
-    else{if(ms){ms.style.color='var(--red)';ms.textContent='✗ تم الرفض. الصوت لن يعمل.';}mb.disabled=false;mb.textContent='حاول مرة أخرى';}
+    if(ok){
+      if(ms){ms.style.color='var(--green)';ms.textContent='✓ الميكروفون جاهز';}
+      setTimeout(()=>{if(mp)mp.classList.add('hidden');},1500);
+    } else {
+      if(ms){ms.style.color='var(--red)';ms.textContent='✗ تم الرفض — تأكد من إذن الميك في الإعدادات';}
+      mb.disabled=false;mb.textContent='حاول مرة أخرى';
+    }
   },{once:true});
 }
 
@@ -967,13 +1057,21 @@ function bindSocket(sk){
     S.roomCode=roomCode;S.isHost=false;S.players=players;S.myId=sk.id;
     $('rcode').textContent=roomCode;showScreen('waiting');renderPlayers(players);setupMic();
   });
-  sk.on('room:playerJoined',async({players,newPeerId})=>{
-    S.players=players;renderPlayers(players);refreshStart(players.length);
+  sk.on('room:playerJoined',async({players,newPeerId,player})=>{
+    S.players=players;
+    addPlayerRow(player||players.find(p=>p.id===newPeerId)||{id:newPeerId,username:'؟'});
+    refreshStart(players.length);
+    showToast((player?.username||'لاعب جديد')+' دخل الغرفة 👋','join');
     if(newPeerId&&newPeerId!==S.myId)await RTC.connect(newPeerId,true);
   });
   sk.on('room:playerLeft',({playerId,players,newHostId})=>{
-    S.players=players;renderPlayers(players);RTC.drop(playerId);
-    if(newHostId===S.myId){S.isHost=true;}refreshStart(players.length);
+    const leaving=S.players.find(p=>p.id===playerId);
+    showToast((leaving?.username||'لاعب')+' خرج من الغرفة','leave');
+    S.players=players;
+    removePlayerRow(playerId);
+    RTC.drop(playerId);
+    if(newHostId===S.myId){S.isHost=true;refreshStart(players.length);}
+    const b=$('pcnt');if(b)b.textContent=players.length+'/8';
   });
 
   // ── Lobby Voice Seats ──────────────────────────────────────────────────────
