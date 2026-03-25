@@ -231,6 +231,20 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
   .vg{grid-template-columns:1fr}.vt{font-size:30px}
 }
 
+/* ══ LOBBY VOICE SEATS ══ */
+.lv-wrap{background:var(--card);border:1px solid var(--brh);border-radius:var(--r);padding:16px;margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.lv-title{font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:var(--lo);}
+.lv-seats{display:flex;align-items:center;gap:16px;width:100%;justify-content:center;}
+.lv-seat{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;max-width:120px;}
+.lv-avatar{width:60px;height:60px;border-radius:50%;background:var(--lift);border:2px solid var(--br);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:26px;transition:border-color .3s,box-shadow .3s;}
+.lv-seat.occupied .lv-avatar{border-color:var(--gold);box-shadow:0 0 0 3px var(--gglow);animation:pulse 1.4s ease-out infinite;}
+.lv-seat.me .lv-avatar{border-color:var(--green);box-shadow:0 0 0 3px rgba(45,199,138,.25);}
+.lv-name{font-family:var(--fm);font-size:10px;color:var(--lo);letter-spacing:.08em;text-align:center;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lv-seat.occupied .lv-name{color:var(--gold);}
+.lv-seat.me .lv-name{color:var(--green);}
+.lv-vs{font-family:var(--fd);font-size:20px;color:var(--lo);flex-shrink:0;}
+.lv-hint{font-family:var(--fm);font-size:9px;color:var(--lo);letter-spacing:.1em;text-align:center;}
+
 /* ══ SETTINGS PANEL ══ */
 #settings-panel{background:var(--card);border:1px solid var(--brh);border-radius:var(--r);padding:16px 20px;margin-top:12px;}
 .settings-title{font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:var(--lo);margin-bottom:14px;}
@@ -554,6 +568,24 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
       <div class="st">العملاء في الميدان <span id="pcnt" class="pc">0/8</span></div>
       <ul id="plist" class="pl" aria-live="polite"></ul>
       <p class="whi">شارك الكود مع زملائك ليدخلوا اللعبة.</p>
+
+      <!-- ══ كراسي الصوت في الانتظار ══ -->
+      <div id="lobby-voice" class="lv-wrap">
+        <div class="lv-title">🎙 كراسي الصوت — اجلس وتكلم</div>
+        <div class="lv-seats">
+          <div class="lv-seat" id="lv-seat-0">
+            <div class="lv-avatar" id="lv-av-0">💺</div>
+            <div class="lv-name" id="lv-nm-0">فاضي</div>
+          </div>
+          <div class="lv-vs">VS</div>
+          <div class="lv-seat" id="lv-seat-1">
+            <div class="lv-avatar" id="lv-av-1">💺</div>
+            <div class="lv-name" id="lv-nm-1">فاضي</div>
+          </div>
+        </div>
+        <button id="btn-lv-sit" class="btn btn-s btn-sm" style="margin-top:10px;">اجلس 🎙</button>
+        <p class="lv-hint">القاعدون يتكلمون — الباقون يسمعون فقط</p>
+      </div>
       <!-- شات عام - ثابت -->
       <div class="inline-chat" style="margin-top:12px;">
         <div class="inline-chat-title">💬 CHAT — الشات</div>
@@ -627,6 +659,7 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
           <span id="tnum" class="tn">30</span>
         </div>
       </div>
+      <button id="btn-skip" class="btn btn-sm hidden" style="background:var(--lift);color:var(--gold);border:1px solid rgba(212,160,23,.3);padding:8px 14px;font-size:12px;width:auto;">تم ✓</button>
       <div id="wchip" class="wc hidden">🔑 <span id="wctxt"></span></div>
     </div>
     <div class="stage" aria-label="المتحدثان الآن">
@@ -756,7 +789,7 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
 let BACKEND_URL = localStorage.getItem('sm_backend_url') || 'https://jasoos-production-bbfe.up.railway.app';
 
 /* ── STATE ── */
-const S={socket:null,myId:null,roomCode:'',isHost:false,role:null,word:null,players:[],totalRounds:5,voted:false};
+const S={socket:null,myId:null,roomCode:'',isHost:false,role:null,word:null,players:[],totalRounds:5,voted:false,lobbySeats:[]};
 
 /* ── UTILS ── */
 const $=id=>document.getElementById(id);
@@ -796,6 +829,7 @@ const RTC=(()=>{
   }
   function mute(m){if(ls)ls.getAudioTracks().forEach(t=>t.enabled=!m);}
   function setActive(ids){const sp=ids.includes(S.myId);mute(!sp);return sp;}
+  function setLobbyActive(seats,myId){mute(!seats.includes(myId));}
   async function connect(pid,init){
     if(peers.has(pid))return;
     const pc=new RTCPeerConnection(ICE);peers.set(pid,pc);
@@ -822,7 +856,7 @@ const RTC=(()=>{
   function play(id,stream){let a=$('aud-'+id);if(!a){a=document.createElement('audio');a.id='aud-'+id;a.autoplay=true;a.playsInline=true;$('audio-box').appendChild(a);}a.srcObject=stream;}
   function drop(id){const pc=peers.get(id);if(pc){pc.close();peers.delete(id);}pend.delete(id);const a=$('aud-'+id);if(a)a.remove();}
   function dropAll(){peers.forEach((_,id)=>drop(id));if(ls){ls.getTracks().forEach(t=>t.stop());ls=null;}}
-  return{getMic,setActive,connect,onOffer,onAnswer,onIce,drop,dropAll};
+  return{getMic,setActive,setLobbyActive,connect,onOffer,onAnswer,onIce,drop,dropAll};
 })();
 
 /* ── UI HELPERS ── */
@@ -941,6 +975,35 @@ function bindSocket(sk){
     S.players=players;renderPlayers(players);RTC.drop(playerId);
     if(newHostId===S.myId){S.isHost=true;}refreshStart(players.length);
   });
+
+  // ── Lobby Voice Seats ──────────────────────────────────────────────────────
+  sk.on('lobby:seats',({seats})=>{
+    S.lobbySeats = seats;
+    const amISeated = seats.includes(S.myId);
+    // update mic: seated players unmuted, rest muted
+    RTC.setLobbyActive(seats, S.myId);
+    // update sit button
+    const btn=$('btn-lv-sit');
+    if(btn){btn.textContent=amISeated?'قم 🚪':'اجلس 🎙';btn.className='btn btn-sm '+(amISeated?'btn-d':'btn-s');btn.style.cssText='margin-top:10px;width:auto;';}
+    // update seat visuals
+    for(let i=0;i<2;i++){
+      const seatEl=$('lv-seat-'+i);
+      const avEl=$('lv-av-'+i);
+      const nmEl=$('lv-nm-'+i);
+      const pid=seats[i]||null;
+      if(!seatEl)continue;
+      if(pid){
+        const p=S.players.find(x=>x.id===pid);
+        seatEl.className='lv-seat occupied'+(pid===S.myId?' me':'');
+        if(avEl){avEl.textContent=ini(p?.username||'?');avEl.style.color=col(pid);}
+        if(nmEl)nmEl.textContent=(pid===S.myId?'أنت':p?.username)||'؟';
+      } else {
+        seatEl.className='lv-seat';
+        if(avEl){avEl.textContent='💺';avEl.style.color='';}
+        if(nmEl)nmEl.textContent='فاضي';
+      }
+    }
+  });
   sk.on('webrtc:offer',({from,offer})=>RTC.onOffer(from,offer));
   sk.on('webrtc:answer',({from,answer})=>RTC.onAnswer(from,answer));
   sk.on('webrtc:ice',({from,candidate})=>RTC.onIce(from,candidate));
@@ -957,6 +1020,13 @@ function bindSocket(sk){
   sk.on('round:start',data=>{
     TMR.stop();S.activePair=data.activePlayers;RTC.setActive(data.activePlayers.map(p=>p.id));
     showScreen('game');renderRound(data);TMR.start(data.duration,$('tnum'),$('tarc'));
+    // زرار تم — يظهر للاعبَين النشطَين والهوست
+    const skipBtn=$('btn-skip');
+    if(skipBtn){
+      const canSkip=S.isHost||data.activePlayers.some(p=>p.id===S.myId);
+      skipBtn.classList.toggle('hidden',!canSkip);
+      skipBtn.disabled=false;
+    }
     // شات الكرسي — يظهر بس للـ 2 اللي دورهم
     const isActive=data.activePlayers.some(p=>p.id===S.myId);
     setSeatChat(isActive);
@@ -964,6 +1034,7 @@ function bindSocket(sk){
   sk.on('round:end',({roundNumber})=>{
     TMR.stop();RTC.setActive([]);
     setSeatChat(false);
+    $('btn-skip')?.classList.add('hidden');
     const t=$('rnd-trans'),tx=$('trans-txt');if(t)t.classList.remove('hidden');if(tx)tx.textContent='جولة '+roundNumber+' انتهت';
     const a=$('tarc');if(a)a.style.strokeDashoffset=0;
   });
@@ -1045,6 +1116,7 @@ function bindSocket(sk){
     S.role     = null;
     S.word     = null;
     S.voted    = false;
+    S.lobbySeats = [];
     TMR.stop();
     RTC.dropAll();
 
@@ -1137,6 +1209,20 @@ function bindButtons(){
     S.socket.emit('spy:guess',{word:w});$('btn-spy').disabled=true;inp.disabled=true;
   });
   $('spy-in').addEventListener('keydown',e=>{if(e.key==='Enter')$('btn-spy').click();});
+
+  // Lobby voice sit / leave
+  $('btn-lv-sit').addEventListener('click',()=>{
+    if(!S.socket)return;
+    const seated=(S.lobbySeats||[]).includes(S.myId);
+    S.socket.emit(seated?'lobby:leave':'lobby:sit');
+  });
+
+  // Skip round (تم)
+  $('btn-skip').addEventListener('click',()=>{
+    if(!S.socket)return;
+    $('btn-skip').disabled=true;
+    S.socket.emit('round:skip');
+  });
 
   // Play again — ready vote
   $('btn-again').addEventListener('click', () => {

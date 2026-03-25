@@ -75,6 +75,7 @@ class Room {
     this.voteTimer    = null;
     this.guessTimer   = null;
     this.readySet     = new Set(); // players who pressed "play again"
+    this.lobbySeats   = [];        // max 2 socketIds sitting in lobby voice
   }
 
   /** Add a player to the room */
@@ -318,6 +319,40 @@ io.on('connection', (socket) => {
     });
   });
 
+  // ── Lobby Voice Seats ────────────────────────────────────────────────────
+  socket.on('lobby:sit', () => {
+    const room = rooms.get(roomCode);
+    if (!room || room.state !== 'lobby') return;
+    if (room.lobbySeats.includes(socket.id)) return; // already seated
+    if (room.lobbySeats.length >= 2) return;          // seats full
+
+    room.lobbySeats.push(socket.id);
+    io.to(roomCode).emit('lobby:seats', { seats: room.lobbySeats });
+  });
+
+  socket.on('lobby:leave', () => {
+    const room = rooms.get(roomCode);
+    if (!room) return;
+    room.lobbySeats = room.lobbySeats.filter(id => id !== socket.id);
+    io.to(roomCode).emit('lobby:seats', { seats: room.lobbySeats });
+  });
+
+  // ── Skip Round (host or active speaker) ──────────────────────────────────
+  socket.on('round:skip', () => {
+    const room = rooms.get(roomCode);
+    if (!room || room.state !== 'playing') return;
+    // Only host or one of the active pair can skip
+    const lastRound = room.rounds[room.rounds.length - 1];
+    const activePair = lastRound ? lastRound.activePlayers.map(p => p.id) : [];
+    const canSkip = socket.id === room.hostId || activePair.includes(socket.id);
+    if (!canSkip) return;
+
+    clearTimeout(room.roundTimer);
+    io.to(room.code).emit('round:end', { roundNumber: room.currentRound, skipped: true });
+    setTimeout(() => startRound(room), CONFIG.INTER_ROUND_MS);
+    console.log(`[Round ${room.currentRound}] Skipped by ${room.players.get(socket.id)?.username}`);
+  });
+
   // ── Play Again (Ready Vote) ───────────────────────────────────────────────
   socket.on('game:ready', () => {
     const room = rooms.get(roomCode);
@@ -346,6 +381,10 @@ io.on('connection', (socket) => {
     if (!room) return;
 
     room.removePlayer(socket.id);
+
+    // Clear from lobby seats if was seated
+    room.lobbySeats = room.lobbySeats.filter(id => id !== socket.id);
+    io.to(roomCode).emit('lobby:seats', { seats: room.lobbySeats });
 
     if (room.players.size === 0) {
       room.clearTimers();
@@ -394,6 +433,7 @@ function restartRoom(room) {
   room.pairQueue    = [];
   room.votes.clear();
   room.readySet.clear();
+  room.lobbySeats  = [];
   room.players.forEach(p => { p.isSpy = false; });
 
   io.to(room.code).emit('game:restarted', {
