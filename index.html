@@ -712,7 +712,9 @@ const RTC=(()=>{
         audio:{echoCancellation:true,noiseSuppression:true,sampleRate:48000},
         video:false
       });
-      mute(true); // مصكّت دايماً حتى يجي دور اللاعب
+      // صكّت الميك إلا لو اللاعب حالياً في الكرسي (جاب الميك وسط الجولة)
+      const _inChair=S.activePair&&S.activePair.some(p=>p.id===S.myId);
+      mute(!_inChair);
 
       // ضروري: لو الـ connections اتعملت قبل ما الميك يُفتح، ضيف الـ tracks ليها
       peers.forEach((pc,pid)=>{
@@ -986,7 +988,7 @@ function bindSocket(sk){
     showScreen('game');renderRound(data);TMR.start(data.duration,$('tnum'),$('tarc'));
   });
   sk.on('round:end',({roundNumber})=>{
-    TMR.stop();RTC.setActive([]);
+    TMR.stop();S.activePair=null;RTC.setActive([]);
     const t=$('rnd-trans'),tx=$('trans-txt');if(t)t.classList.remove('hidden');if(tx)tx.textContent='جولة '+roundNumber+' انتهت';
     const a=$('tarc');if(a)a.style.strokeDashoffset=0;
   });
