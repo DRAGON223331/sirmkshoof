@@ -74,6 +74,7 @@ class Room {
     this.roundTimer   = null;
     this.voteTimer    = null;
     this.guessTimer   = null;
+    this.readySet     = new Set(); // players who pressed "play again"
   }
 
   /** Add a player to the room */
@@ -317,6 +318,25 @@ io.on('connection', (socket) => {
     });
   });
 
+  // ── Play Again (Ready Vote) ───────────────────────────────────────────────
+  socket.on('game:ready', () => {
+    const room = rooms.get(roomCode);
+    if (!room || room.state !== 'ended') return;
+
+    room.readySet.add(socket.id);
+
+    io.to(roomCode).emit('game:ready:update', {
+      readyCount   : room.readySet.size,
+      totalPlayers : room.players.size,
+      readyIds     : Array.from(room.readySet),
+    });
+
+    // When all current players are ready → restart
+    if (room.readySet.size >= room.players.size) {
+      restartRoom(room);
+    }
+  });
+
   // ── Disconnect ────────────────────────────────────────────────────────────
   socket.on('disconnect', () => {
     console.log(`[-] ${socket.id} disconnected`);
@@ -340,6 +360,19 @@ io.on('connection', (socket) => {
       newHostId  : room.hostId,
     });
 
+    // If game ended and a player leaves, re-check ready count
+    if (room.state === 'ended') {
+      room.readySet.delete(socket.id);
+      io.to(roomCode).emit('game:ready:update', {
+        readyCount   : room.readySet.size,
+        totalPlayers : room.players.size,
+        readyIds     : Array.from(room.readySet),
+      });
+      if (room.readySet.size >= room.players.size && room.players.size > 0) {
+        restartRoom(room);
+      }
+    }
+
     // If game is in progress and we drop below minimum, end gracefully
     if (room.state === 'playing' && room.players.size < 2) {
       room.clearTimers();
@@ -348,6 +381,28 @@ io.on('connection', (socket) => {
     }
   });
 });
+
+// ─── Restart Room ─────────────────────────────────────────────────────────────
+
+function restartRoom(room) {
+  room.clearTimers();
+  room.state        = 'lobby';
+  room.word         = null;
+  room.spyId        = null;
+  room.currentRound = 0;
+  room.rounds       = [];
+  room.pairQueue    = [];
+  room.votes.clear();
+  room.readySet.clear();
+  room.players.forEach(p => { p.isSpy = false; });
+
+  io.to(room.code).emit('game:restarted', {
+    players : room.getPlayerList(),
+    hostId  : room.hostId,
+  });
+
+  console.log(`[R] Room ${room.code} restarted — back to lobby`);
+}
 
 // ─── Game Logic ───────────────────────────────────────────────────────────────
 

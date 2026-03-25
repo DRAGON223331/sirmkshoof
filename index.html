@@ -724,7 +724,19 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
         <div id="res-gr" class="rr hidden"><span class="rla">خمّن الجاسوس</span><span id="res-gu" class="rgu"></span></div>
         <div class="rr"><span class="rla">السبب</span><span id="res-rea" class="rre"></span></div>
       </div>
-      <button id="btn-again" class="btn btn-p">العب مرة أخرى</button>
+
+      <!-- Ready-vote block -->
+      <div id="again-block" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:12px;">
+        <button id="btn-again" class="btn btn-p">🔄 العب مرة أخرى</button>
+        <div id="ready-counter" class="hidden" style="font-family:var(--fm);font-size:11px;color:var(--mid);letter-spacing:.1em;text-align:center;">
+          مستعد <span id="ready-now">0</span> / <span id="ready-total">0</span>
+        </div>
+        <div id="ready-avatars" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;min-height:32px;"></div>
+        <p id="ready-hint" class="hidden" style="font-family:var(--fm);font-size:10px;color:var(--lo);letter-spacing:.08em;text-align:center;">
+          في انتظار باقي اللاعبين…
+        </p>
+      </div>
+
     </div>
   </section>
 
@@ -1003,6 +1015,58 @@ function bindSocket(sk){
     else if(gr)gr.classList.add('hidden');
   });
   sk.on('game:aborted',({reason})=>{TMR.stop();RTC.dropAll();alert('انتهت اللعبة: '+reason);location.reload();});
+
+  // ── Play Again ──────────────────────────────────────────────────────────────
+  sk.on('game:ready:update', ({ readyCount, totalPlayers, readyIds }) => {
+    const now = $('ready-now'), tot = $('ready-total');
+    if (now) now.textContent = readyCount;
+    if (tot) tot.textContent = totalPlayers;
+    $('ready-counter')?.classList.remove('hidden');
+
+    // Show avatar dots for each ready player
+    const av = $('ready-avatars');
+    if (av) {
+      av.innerHTML = '';
+      S.players.forEach(p => {
+        const isReady = readyIds.includes(p.id);
+        const dot = document.createElement('div');
+        dot.title = p.username;
+        dot.style.cssText = `width:32px;height:32px;border-radius:50%;background:var(--lift);border:2px solid ${isReady ? 'var(--green)' : 'var(--br)'};display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:14px;color:${col(p.id)};transition:border-color .3s;`;
+        dot.textContent = ini(p.username);
+        av.appendChild(dot);
+      });
+    }
+  });
+
+  sk.on('game:restarted', ({ players, hostId }) => {
+    // Reset client state — keep same socket, same room
+    S.players  = players;
+    S.isHost   = (hostId === S.myId);
+    S.role     = null;
+    S.word     = null;
+    S.voted    = false;
+    TMR.stop();
+    RTC.dropAll();
+
+    // Reset ready-vote UI for next time
+    const ba = $('btn-again');
+    if (ba) { ba.disabled = false; ba.textContent = '🔄 العب مرة أخرى'; }
+    $('ready-counter')?.classList.add('hidden');
+    $('ready-hint')?.classList.add('hidden');
+    const av = $('ready-avatars'); if (av) av.innerHTML = '';
+
+    // Clear chat boxes
+    ['chat-msgs-waiting','chat-msgs-game'].forEach(id => {
+      const b = $(id); if (b) b.innerHTML = '';
+    });
+
+    // Go back to waiting room
+    $('rcode').textContent = S.roomCode;
+    showScreen('waiting');
+    renderPlayers(players);
+    refreshStart(players.length);
+    setupMic();
+  });
   sk.on('chat:msg',(data)=>{
     // اكتب في الشات العام في الشاشتين
     appendChatMsg(data, GENERAL_CHAT_BOXES);
@@ -1074,8 +1138,15 @@ function bindButtons(){
   });
   $('spy-in').addEventListener('keydown',e=>{if(e.key==='Enter')$('btn-spy').click();});
 
-  // Play again
-  $('btn-again').addEventListener('click',()=>{RTC.dropAll();location.reload();});
+  // Play again — ready vote
+  $('btn-again').addEventListener('click', () => {
+    if (!S.socket) return;
+    $('btn-again').disabled = true;
+    $('btn-again').textContent = '✅ أنا مستعد!';
+    $('ready-counter').classList.remove('hidden');
+    $('ready-hint').classList.remove('hidden');
+    S.socket.emit('game:ready');
+  });
 }
 
 /* ── BOOT ── */
