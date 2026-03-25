@@ -231,29 +231,6 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
   .vg{grid-template-columns:1fr}.vt{font-size:30px}
 }
 
-/* ══ LOBBY VOICE SEATS ══ */
-.lv-wrap{background:var(--card);border:1px solid var(--brh);border-radius:var(--r);padding:16px;margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:10px;}
-.lv-title{font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:var(--lo);}
-.lv-seats{display:flex;align-items:center;gap:16px;width:100%;justify-content:center;}
-.lv-seat{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;max-width:120px;}
-.lv-avatar{width:60px;height:60px;border-radius:50%;background:var(--lift);border:2px solid var(--br);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:26px;transition:border-color .3s,box-shadow .3s;}
-.lv-seat.occupied .lv-avatar{border-color:var(--gold);box-shadow:0 0 0 3px var(--gglow);animation:pulse 1.4s ease-out infinite;}
-.lv-seat.me .lv-avatar{border-color:var(--green);box-shadow:0 0 0 3px rgba(45,199,138,.25);}
-.lv-name{font-family:var(--fm);font-size:10px;color:var(--lo);letter-spacing:.08em;text-align:center;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.lv-seat.occupied .lv-name{color:var(--gold);}
-.lv-seat.me .lv-name{color:var(--green);}
-.lv-vs{font-family:var(--fd);font-size:20px;color:var(--lo);flex-shrink:0;}
-.lv-hint{font-family:var(--fm);font-size:9px;color:var(--lo);letter-spacing:.1em;text-align:center;}
-
-/* ══ TOAST NOTIFICATIONS ══ */
-#toast-wrap{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:99998;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;width:calc(100% - 40px);max-width:360px;}
-.toast{background:var(--card);border:1px solid var(--br);border-radius:var(--rs);padding:9px 16px;font-family:var(--fm);font-size:11px;letter-spacing:.08em;color:var(--hi);display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:toastIn .3s cubic-bezier(.34,1.56,.64,1) both;white-space:nowrap;}
-.toast.out{animation:toastOut .3s ease forwards;}
-.toast-join{border-color:rgba(45,199,138,.35);background:rgba(45,199,138,.08);}
-.toast-leave{border-color:rgba(230,57,70,.3);background:rgba(230,57,70,.06);}
-@keyframes toastIn{from{opacity:0;transform:translateY(-12px) scale(.95)}to{opacity:1;transform:none}}
-@keyframes toastOut{to{opacity:0;transform:translateY(-8px);}}
-
 /* ══ SETTINGS PANEL ══ */
 #settings-panel{background:var(--card);border:1px solid var(--brh);border-radius:var(--r);padding:16px 20px;margin-top:12px;}
 .settings-title{font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:var(--lo);margin-bottom:14px;}
@@ -373,93 +350,6 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
 .q-next:hover{border-color:var(--gold);color:var(--gold);}
 .q-close{background:var(--gold);border:none;color:#000;border-radius:var(--rs);padding:10px 20px;font-family:var(--fm);font-size:11px;letter-spacing:.1em;cursor:pointer;font-weight:700;transition:opacity .15s;}
 .q-close:hover{opacity:.85;}
-/* ══ INLINE CHAT ══ */
-.inline-chat{
-  margin-top:14px;
-  background:var(--card);border:1px solid var(--br);border-radius:var(--r);
-  display:flex;flex-direction:column;overflow:hidden;
-}
-.inline-chat-title{
-  font-family:var(--fm);font-size:9px;letter-spacing:.18em;color:var(--lo);
-  padding:8px 14px;border-bottom:1px solid var(--br);
-}
-.inline-chat-msgs{
-  display:flex;flex-direction:column;gap:6px;
-  padding:10px 12px;max-height:180px;overflow-y:auto;min-height:60px;
-}
-.inline-chat-msgs::-webkit-scrollbar{width:3px;}
-.inline-chat-msgs::-webkit-scrollbar-thumb{background:var(--brh);border-radius:2px;}
-.chat-msg{display:flex;flex-direction:column;gap:2px;}
-.chat-msg.me{align-items:flex-end;}
-.chat-msg.me .chat-bubble{background:rgba(212,160,23,.12);border-color:rgba(212,160,23,.2);}
-.chat-name{font-family:var(--fm);font-size:9px;color:var(--lo);letter-spacing:.06em;}
-.chat-bubble{
-  background:var(--lift);border:1px solid var(--br);border-radius:8px;
-  padding:6px 10px;font-size:13px;color:var(--hi);
-  font-family:var(--fa);direction:rtl;max-width:85%;word-break:break-word;line-height:1.5;
-}
-.chat-sys{font-family:var(--fm);font-size:10px;color:var(--lo);text-align:center;}
-.inline-chat-input-row{
-  display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--br);
-}
-.chat-fi{
-  flex:1;background:var(--inp);border:1px solid var(--brh);border-radius:var(--rs);
-  color:var(--hi);font-family:var(--fa);font-size:13px;padding:7px 10px;
-  outline:none;direction:rtl;transition:border-color .2s;
-}
-.chat-fi:focus{border-color:var(--blue);}
-.chat-fi::placeholder{color:var(--lo);}
-.chat-send-btn{
-  background:var(--blue);border:none;border-radius:var(--rs);
-  color:#000;font-family:var(--fm);font-size:10px;padding:7px 12px;
-  cursor:pointer;font-weight:700;transition:opacity .15s;flex-shrink:0;
-}
-.chat-send-btn:hover{opacity:.85;}
-
-/* ══ SEAT CHAT (يظهر بس لما يجي دورك) ══ */
-#seat-chat{
-  margin-top:10px;
-  background:rgba(212,160,23,.06);
-  border:1px solid rgba(212,160,23,.25);
-  border-radius:var(--r);overflow:hidden;
-  display:none;
-  animation:sli .25s ease;
-}
-#seat-chat.visible{display:flex;flex-direction:column;}
-.seat-chat-title{
-  font-family:var(--fm);font-size:9px;letter-spacing:.18em;
-  color:var(--gold);padding:7px 14px;
-  border-bottom:1px solid rgba(212,160,23,.15);
-  display:flex;align-items:center;gap:6px;
-}
-.seat-chat-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:lp 1.2s ease-in-out infinite;}
-#seat-msgs{
-  display:flex;flex-direction:column;gap:6px;
-  padding:10px 12px;max-height:120px;overflow-y:auto;min-height:44px;
-}
-#seat-msgs::-webkit-scrollbar{width:3px;}
-#seat-msgs::-webkit-scrollbar-thumb{background:rgba(212,160,23,.2);border-radius:2px;}
-.seat-bubble{
-  background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.2);border-radius:8px;
-  padding:6px 10px;font-size:13px;color:var(--hi);
-  font-family:var(--fa);direction:rtl;max-width:85%;word-break:break-word;line-height:1.5;
-}
-.seat-bubble.other{background:var(--lift);border-color:var(--br);}
-.seat-name{font-family:var(--fm);font-size:9px;color:var(--gdim);padding:0 4px;}
-.seat-input-row{display:flex;gap:6px;padding:8px 10px;border-top:1px solid rgba(212,160,23,.15);}
-#seat-input{
-  flex:1;background:var(--inp);border:1px solid rgba(212,160,23,.2);border-radius:var(--rs);
-  color:var(--hi);font-family:var(--fa);font-size:13px;padding:7px 10px;
-  outline:none;direction:rtl;transition:border-color .2s;
-}
-#seat-input:focus{border-color:var(--gold);}
-#seat-input::placeholder{color:var(--lo);}
-#seat-send{
-  background:var(--gold);border:none;border-radius:var(--rs);
-  color:#000;font-family:var(--fm);font-size:10px;padding:7px 12px;
-  cursor:pointer;font-weight:700;transition:opacity .15s;flex-shrink:0;
-}
-#seat-send:hover{opacity:.85;}
   </style>
 </head>
 <body>
@@ -496,7 +386,6 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
 
 <div id="cdot" title="جاري الاتصال..."></div>
 <div class="scanlines" aria-hidden="true"></div>
-<div id="toast-wrap" aria-live="polite"></div>
 
 <div id="app">
 
@@ -578,33 +467,6 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
       <div class="st">العملاء في الميدان <span id="pcnt" class="pc">0/8</span></div>
       <ul id="plist" class="pl" aria-live="polite"></ul>
       <p class="whi">شارك الكود مع زملائك ليدخلوا اللعبة.</p>
-
-      <!-- ══ كراسي الصوت في الانتظار ══ -->
-      <div id="lobby-voice" class="lv-wrap">
-        <div class="lv-title">🎙 كراسي الصوت — اجلس وتكلم</div>
-        <div class="lv-seats">
-          <div class="lv-seat" id="lv-seat-0">
-            <div class="lv-avatar" id="lv-av-0">💺</div>
-            <div class="lv-name" id="lv-nm-0">فاضي</div>
-          </div>
-          <div class="lv-vs">VS</div>
-          <div class="lv-seat" id="lv-seat-1">
-            <div class="lv-avatar" id="lv-av-1">💺</div>
-            <div class="lv-name" id="lv-nm-1">فاضي</div>
-          </div>
-        </div>
-        <button id="btn-lv-sit" class="btn btn-s btn-sm" style="margin-top:10px;">اجلس 🎙</button>
-        <p class="lv-hint">القاعدون يتكلمون — الباقون يسمعون فقط</p>
-      </div>
-      <!-- شات عام - ثابت -->
-      <div class="inline-chat" style="margin-top:12px;">
-        <div class="inline-chat-title">💬 CHAT — الشات</div>
-        <div class="inline-chat-msgs" id="chat-msgs-waiting"></div>
-        <div class="inline-chat-input-row">
-          <button class="chat-send-btn" id="chat-send-waiting">إرسال</button>
-          <input class="chat-fi" id="chat-input-waiting" type="text" placeholder="اكتب رسالة…" maxlength="200" autocomplete="off" dir="rtl"/>
-        </div>
-      </div>
       <div id="micp" class="mp hidden">
         <div class="mpi">🎙</div>
         <p class="mpt">اللعبة محتاجة إذن الميكروفون.</p>
@@ -669,7 +531,6 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
           <span id="tnum" class="tn">30</span>
         </div>
       </div>
-      <button id="btn-skip" class="btn btn-sm hidden" style="background:var(--lift);color:var(--gold);border:1px solid rgba(212,160,23,.3);padding:8px 14px;font-size:12px;width:auto;">تم ✓</button>
       <div id="wchip" class="wc hidden">🔑 <span id="wctxt"></span></div>
     </div>
     <div class="stage" aria-label="المتحدثان الآن">
@@ -689,27 +550,6 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
     <div class="asc">
       <div class="asl">يستمعون</div>
       <div id="aud-row" class="asr"></div>
-    </div>
-    <!-- شات الكرسي — يظهر بس لما يجي دورك -->
-    <div id="seat-chat">
-      <div class="seat-chat-title">
-        <span class="seat-chat-dot"></span>
-        🎙 شات الكرسي — أنت في الهوا
-      </div>
-      <div id="seat-msgs"></div>
-      <div class="seat-input-row">
-        <button id="seat-send">إرسال</button>
-        <input id="seat-input" type="text" placeholder="اكتب لزميلك في الكرسي…" maxlength="200" autocomplete="off" dir="rtl"/>
-      </div>
-    </div>
-    <!-- شات عام ثابت - بدون input، بيتحدث من الانتظار -->
-    <div class="inline-chat" style="margin-top:10px;">
-      <div class="inline-chat-title">💬 CHAT — الشات العام</div>
-      <div class="inline-chat-msgs" id="chat-msgs-game"></div>
-      <div class="inline-chat-input-row">
-        <button class="chat-send-btn" id="chat-send-game">إرسال</button>
-        <input class="chat-fi" id="chat-input-game" type="text" placeholder="اكتب رسالة…" maxlength="200" autocomplete="off" dir="rtl"/>
-      </div>
     </div>
     <div id="rnd-trans" class="rt hidden">
       <div class="rtt" id="trans-txt">انتهت الجولة</div>
@@ -767,19 +607,7 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
         <div id="res-gr" class="rr hidden"><span class="rla">خمّن الجاسوس</span><span id="res-gu" class="rgu"></span></div>
         <div class="rr"><span class="rla">السبب</span><span id="res-rea" class="rre"></span></div>
       </div>
-
-      <!-- Ready-vote block -->
-      <div id="again-block" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:12px;">
-        <button id="btn-again" class="btn btn-p">🔄 العب مرة أخرى</button>
-        <div id="ready-counter" class="hidden" style="font-family:var(--fm);font-size:11px;color:var(--mid);letter-spacing:.1em;text-align:center;">
-          مستعد <span id="ready-now">0</span> / <span id="ready-total">0</span>
-        </div>
-        <div id="ready-avatars" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;min-height:32px;"></div>
-        <p id="ready-hint" class="hidden" style="font-family:var(--fm);font-size:10px;color:var(--lo);letter-spacing:.08em;text-align:center;">
-          في انتظار باقي اللاعبين…
-        </p>
-      </div>
-
+      <button id="btn-again" class="btn btn-p">العب مرة أخرى</button>
     </div>
   </section>
 
@@ -796,10 +624,10 @@ body{background:var(--void);color:var(--hi);font-family:var(--fb);font-size:16px
 
 /* ── CONFIG: رابط السيرفر ── */
 // هيتحدد من localStorage أو من الـ setup screen
-let BACKEND_URL = localStorage.getItem('sm_backend_url') || 'https://jasoos-production-bbfe.up.railway.app';
+let BACKEND_URL = localStorage.getItem('sm_backend_url') || '';
 
 /* ── STATE ── */
-const S={socket:null,myId:null,roomCode:'',isHost:false,role:null,word:null,players:[],totalRounds:5,voted:false,lobbySeats:[]};
+const S={socket:null,myId:null,roomCode:'',isHost:false,role:null,word:null,players:[],totalRounds:5,voted:false};
 
 /* ── UTILS ── */
 const $=id=>document.getElementById(id);
@@ -831,60 +659,149 @@ const TMR=(()=>{
 
 /* ── WEBRTC ── */
 const RTC=(()=>{
-  const peers=new Map(),pend=new Map();let ls=null;
-  let audioCtxUnlocked=false;
-  const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
+  const peers=new Map(),pend=new Map();
+  let ls=null;
 
-  // iOS Safari requires AudioContext to be resumed after a user gesture
+  // ── ICE Servers: STUN + TURN للشبكات المختلفة (موبايل، NAT) ──
+  const ICE={
+    iceServers:[
+      {urls:'stun:stun.l.google.com:19302'},
+      {urls:'stun:stun1.l.google.com:19302'},
+      {urls:'stun:stun2.l.google.com:19305'},
+      {urls:'stun:stun.services.mozilla.com'},
+      // TURN مجاني بدون تسجيل — ضروري للموبايل والشبكات المختلفة
+      {
+        urls:[
+          'turn:numb.viagenie.ca',
+          'turn:numb.viagenie.ca:3478?transport=tcp'
+        ],
+        username:'webrtc@live.com',
+        credential:'muazkh'
+      },
+      {
+        urls:'turn:relay.backups.cz',
+        username:'webrtc',
+        credential:'webrtc'
+      }
+    ],
+    iceTransportPolicy:'all',
+    bundlePolicy:'max-bundle',
+    rtcpMuxPolicy:'require'
+  };
+
+  // ── iOS AudioContext unlock (لازم يكون قبل أي صوت) ──
+  let audioUnlocked=false;
   function unlockAudio(){
-    if(audioCtxUnlocked)return;
+    if(audioUnlocked)return;
     try{
-      const ctx=new (window.AudioContext||window.webkitAudioContext)();
-      const buf=ctx.createBuffer(1,1,22050);
-      const src=ctx.createBufferSource();src.buffer=buf;
-      src.connect(ctx.destination);src.start(0);
-      ctx.resume().then(()=>{audioCtxUnlocked=true;});
+      const ctx=new(window.AudioContext||window.webkitAudioContext)();
+      const b=ctx.createBuffer(1,1,22050);
+      const s=ctx.createBufferSource();s.buffer=b;
+      s.connect(ctx.destination);s.start(0);
+      ctx.resume();audioUnlocked=true;
     }catch(_){}
   }
-  // Call once on first user tap
-  document.addEventListener('touchstart',unlockAudio,{once:true,passive:true});
-  document.addEventListener('click',unlockAudio,{once:true,passive:true});
+  ['touchstart','touchend','click','keydown'].forEach(ev=>
+    document.addEventListener(ev,unlockAudio,{once:true,passive:true})
+  );
 
+  // ── getMic: يجيب الميك ويضيف الـ tracks لأي connection موجود ──
   async function getMic(){
     try{
-      // iOS requires explicit constraints — no 'advanced'
-      const constraints={audio:{echoCancellation:true,noiseSuppression:true,sampleRate:48000},video:false};
-      ls=await navigator.mediaDevices.getUserMedia(constraints);
-      mute(true);
+      ls=await navigator.mediaDevices.getUserMedia({
+        audio:{echoCancellation:true,noiseSuppression:true,sampleRate:48000},
+        video:false
+      });
+      mute(true); // مصكّت دايماً حتى يجي دور اللاعب
+
+      // ضروري: لو الـ connections اتعملت قبل ما الميك يُفتح، ضيف الـ tracks ليها
+      peers.forEach((pc,pid)=>{
+        ls.getTracks().forEach(track=>{
+          const already=pc.getSenders().some(s=>s.track&&s.track.id===track.id);
+          if(!already){
+            pc.addTrack(track,ls);
+            // أعد التفاوض عشان الطرف الثاني يعرف بالـ track الجديد
+            if(pc.signalingState==='stable'){
+              pc.createOffer().then(o=>pc.setLocalDescription(o)).then(()=>{
+                S.socket.emit('webrtc:offer',{to:pid,offer:pc.localDescription});
+              }).catch(()=>{});
+            }
+          }
+        });
+      });
       return true;
     }catch(e){console.warn('[RTC getMic]',e);return false;}
   }
+
   function mute(m){if(ls)ls.getAudioTracks().forEach(t=>t.enabled=!m);}
-  function setActive(ids){const sp=ids.includes(S.myId);mute(!sp);return sp;}
-  function setLobbyActive(seats,myId){mute(!seats.includes(myId));}
+  function setActive(ids){mute(!ids.includes(S.myId));}
+
   async function connect(pid,init){
     if(peers.has(pid))return;
-    const pc=new RTCPeerConnection(ICE);peers.set(pid,pc);
+    const pc=new RTCPeerConnection(ICE);
+    peers.set(pid,pc);
+
+    // ضيف الـ tracks لو الميك شغال
     if(ls)ls.getTracks().forEach(t=>pc.addTrack(t,ls));
-    pc.ontrack=e=>play(pid,e.streams[0]||new MediaStream([e.track]));
-    pc.onicecandidate=e=>{if(e.candidate)S.socket.emit('webrtc:ice',{to:pid,candidate:e.candidate});};
-    pc.onconnectionstatechange=()=>{if(pc.connectionState==='failed')pc.restartIce();};
-    if(init){const o=await pc.createOffer();await pc.setLocalDescription(o);S.socket.emit('webrtc:offer',{to:pid,offer:pc.localDescription});}
+
+    pc.ontrack=e=>{
+      const stream=e.streams[0]||new MediaStream([e.track]);
+      play(pid,stream);
+    };
+    pc.onicecandidate=e=>{
+      if(e.candidate)S.socket.emit('webrtc:ice',{to:pid,candidate:e.candidate});
+    };
+    pc.onconnectionstatechange=()=>{
+      console.log(`[RTC] ${pid} → ${pc.connectionState}`);
+      if(pc.connectionState==='failed'){
+        console.warn('[RTC] Connection failed, restarting ICE...');
+        pc.restartIce();
+      }
+    };
+    pc.onicegatheringstatechange=()=>{
+      console.log(`[RTC] ICE gathering: ${pc.iceGatheringState}`);
+    };
+
+    if(init){
+      const o=await pc.createOffer();
+      await pc.setLocalDescription(o);
+      S.socket.emit('webrtc:offer',{to:pid,offer:pc.localDescription});
+    }
   }
+
   async function onOffer(from,offer){
     if(!peers.has(from))await connect(from,false);
     const pc=peers.get(from);if(!pc)return;
     await pc.setRemoteDescription(new RTCSessionDescription(offer));
-    const a=await pc.createAnswer();await pc.setLocalDescription(a);
-    S.socket.emit('webrtc:answer',{to:from,answer:pc.localDescription});flush(from,pc);
+    const a=await pc.createAnswer();
+    await pc.setLocalDescription(a);
+    S.socket.emit('webrtc:answer',{to:from,answer:pc.localDescription});
+    await flush(from,pc);
   }
-  async function onAnswer(from,answer){const pc=peers.get(from);if(!pc)return;await pc.setRemoteDescription(new RTCSessionDescription(answer));flush(from,pc);}
+
+  async function onAnswer(from,answer){
+    const pc=peers.get(from);if(!pc)return;
+    await pc.setRemoteDescription(new RTCSessionDescription(answer));
+    await flush(from,pc);
+  }
+
   async function onIce(from,c){
     const pc=peers.get(from);
-    if(!pc||!pc.remoteDescription){if(!pend.has(from))pend.set(from,[]);pend.get(from).push(c);return;}
+    if(!pc||!pc.remoteDescription){
+      if(!pend.has(from))pend.set(from,[]);
+      pend.get(from).push(c);return;
+    }
     try{await pc.addIceCandidate(new RTCIceCandidate(c));}catch(_){}
   }
-  async function flush(id,pc){for(const c of(pend.get(id)||[])){try{await pc.addIceCandidate(new RTCIceCandidate(c));}catch(_){}}pend.delete(id);}
+
+  async function flush(id,pc){
+    for(const c of(pend.get(id)||[])){
+      try{await pc.addIceCandidate(new RTCIceCandidate(c));}catch(_){}
+    }
+    pend.delete(id);
+  }
+
+  // play: يشغّل الصوت مع إصلاح iOS
   function play(id,stream){
     let a=$('aud-'+id);
     if(!a){
@@ -892,31 +809,29 @@ const RTC=(()=>{
       a.id='aud-'+id;
       a.autoplay=true;
       a.playsInline=true;
-      a.setAttribute('playsinline','');       // iOS attr
-      a.setAttribute('webkit-playsinline',''); // older iOS
+      a.setAttribute('playsinline','');
+      a.setAttribute('webkit-playsinline','');
       $('audio-box').appendChild(a);
     }
     a.srcObject=stream;
-    // iOS Safari needs explicit .play() after srcObject set
-    a.play().catch(e=>console.warn('[RTC play]',e));
+    // iOS Safari يحتاج .play() صريح بعد srcObject
+    a.play().catch(e=>console.warn('[RTC play]',id,e));
   }
-  function drop(id){const pc=peers.get(id);if(pc){pc.close();peers.delete(id);}pend.delete(id);const a=$('aud-'+id);if(a)a.remove();}
-  function dropAll(){peers.forEach((_,id)=>drop(id));if(ls){ls.getTracks().forEach(t=>t.stop());ls=null;}audioCtxUnlocked=false;}
-  return{getMic,setActive,setLobbyActive,connect,onOffer,onAnswer,onIce,drop,dropAll};
-})();
 
-/* ── TOAST ── */
-function showToast(msg, type='join'){
-  const wrap=$('toast-wrap');if(!wrap)return;
-  const t=document.createElement('div');
-  t.className='toast toast-'+type;
-  t.innerHTML=(type==='join'?'<span style="color:var(--green)">●</span>':'<span style="color:var(--red)">●</span>')+' '+esc(msg);
-  wrap.appendChild(t);
-  setTimeout(()=>{
-    t.classList.add('out');
-    setTimeout(()=>t.remove(),300);
-  },3000);
-}
+  function drop(id){
+    const pc=peers.get(id);
+    if(pc){pc.close();peers.delete(id);}
+    pend.delete(id);
+    const a=$('aud-'+id);if(a)a.remove();
+  }
+
+  function dropAll(){
+    peers.forEach((_,id)=>drop(id));
+    if(ls){ls.getTracks().forEach(t=>t.stop());ls=null;}
+  }
+
+  return{getMic,setActive,connect,onOffer,onAnswer,onIce,drop,dropAll};
+})();
 
 /* ── UI HELPERS ── */
 function renderPlayers(players){
@@ -924,23 +839,10 @@ function renderPlayers(players){
   list.innerHTML='';
   players.forEach(p=>{
     const li=document.createElement('li');li.className='pi';
-    li.id='pi-'+p.id;
     li.innerHTML=`<div class="pa" style="color:${col(p.id)}">${ini(p.username)}</div><span class="pn">${esc(p.username)}</span>${p.isHost?'<span class="hb">HOST</span>':''}${p.id===S.myId?'<span class="yb">أنت</span>':''}`;
     list.appendChild(li);
   });
   const b=$('pcnt');if(b)b.textContent=players.length+'/8';
-}
-function addPlayerRow(player){
-  const list=$('plist');if(!list)return;
-  if($('pi-'+player.id))return; // already exists
-  const li=document.createElement('li');li.className='pi';li.id='pi-'+player.id;
-  li.innerHTML=`<div class="pa" style="color:${col(player.id)}">${ini(player.username)}</div><span class="pn">${esc(player.username)}</span>${player.isHost?'<span class="hb">HOST</span>':''}`;
-  list.appendChild(li);
-  const b=$('pcnt');if(b)b.textContent=list.children.length+'/8';
-}
-function removePlayerRow(playerId){
-  const li=$('pi-'+playerId);
-  if(li){li.style.animation='sli .25s ease reverse';setTimeout(()=>li.remove(),220);}
 }
 function refreshStart(n){
   const btn=$('btn-start');if(!btn)return;
@@ -982,35 +884,36 @@ function renderVotes(players,onVote){
 /* ── MIC SETUP ── */
 async function setupMic(){
   const mp=$('micp'),ms=$('micst');
-  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
-
-  // iOS Safari doesn't support permissions.query for microphone → always show button
+  // iOS Safari لا يدعم permissions.query — نعرض الزرار دايماً على الموبايل
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||
+              (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   let granted=false;
   if(!isIOS){
     try{const r=await navigator.permissions.query({name:'microphone'});granted=r.state==='granted';}catch(_){}
   }
-
   if(granted){
     const ok=await RTC.getMic();
     if(ok&&ms){ms.style.color='var(--green)';ms.textContent='✓ الميكروفون جاهز';}
     return;
   }
-
-  // Show mic button (required on mobile for user-gesture unlock)
   if(mp)mp.classList.remove('hidden');
   const mb=$('btn-mic');
   if(!mb)return;
-  mb.addEventListener('click',async()=>{
+  // نستخدم دالة مستقلة بدل {once:true} عشان نقدر نعيد تشغيلها
+  async function doMic(){
+    mb.removeEventListener('click',doMic);
     mb.disabled=true;mb.textContent='جاري الطلب…';
     const ok=await RTC.getMic();
     if(ok){
       if(ms){ms.style.color='var(--green)';ms.textContent='✓ الميكروفون جاهز';}
       setTimeout(()=>{if(mp)mp.classList.add('hidden');},1500);
     } else {
-      if(ms){ms.style.color='var(--red)';ms.textContent='✗ تم الرفض — تأكد من إذن الميك في الإعدادات';}
+      if(ms){ms.style.color='var(--red)';ms.textContent='✗ الرفض — افتح الإعدادات وأذن للميكروفون';}
       mb.disabled=false;mb.textContent='حاول مرة أخرى';
+      mb.addEventListener('click',doMic);
     }
-  },{once:true});
+  }
+  mb.addEventListener('click',doMic);
 }
 
 /* ── CONNECT TO SERVER ── */
@@ -1057,50 +960,13 @@ function bindSocket(sk){
     S.roomCode=roomCode;S.isHost=false;S.players=players;S.myId=sk.id;
     $('rcode').textContent=roomCode;showScreen('waiting');renderPlayers(players);setupMic();
   });
-  sk.on('room:playerJoined',async({players,newPeerId,player})=>{
-    S.players=players;
-    addPlayerRow(player||players.find(p=>p.id===newPeerId)||{id:newPeerId,username:'؟'});
-    refreshStart(players.length);
-    showToast((player?.username||'لاعب جديد')+' دخل الغرفة 👋','join');
+  sk.on('room:playerJoined',async({players,newPeerId})=>{
+    S.players=players;renderPlayers(players);refreshStart(players.length);
     if(newPeerId&&newPeerId!==S.myId)await RTC.connect(newPeerId,true);
   });
   sk.on('room:playerLeft',({playerId,players,newHostId})=>{
-    const leaving=S.players.find(p=>p.id===playerId);
-    showToast((leaving?.username||'لاعب')+' خرج من الغرفة','leave');
-    S.players=players;
-    removePlayerRow(playerId);
-    RTC.drop(playerId);
-    if(newHostId===S.myId){S.isHost=true;refreshStart(players.length);}
-    const b=$('pcnt');if(b)b.textContent=players.length+'/8';
-  });
-
-  // ── Lobby Voice Seats ──────────────────────────────────────────────────────
-  sk.on('lobby:seats',({seats})=>{
-    S.lobbySeats = seats;
-    const amISeated = seats.includes(S.myId);
-    // update mic: seated players unmuted, rest muted
-    RTC.setLobbyActive(seats, S.myId);
-    // update sit button
-    const btn=$('btn-lv-sit');
-    if(btn){btn.textContent=amISeated?'قم 🚪':'اجلس 🎙';btn.className='btn btn-sm '+(amISeated?'btn-d':'btn-s');btn.style.cssText='margin-top:10px;width:auto;';}
-    // update seat visuals
-    for(let i=0;i<2;i++){
-      const seatEl=$('lv-seat-'+i);
-      const avEl=$('lv-av-'+i);
-      const nmEl=$('lv-nm-'+i);
-      const pid=seats[i]||null;
-      if(!seatEl)continue;
-      if(pid){
-        const p=S.players.find(x=>x.id===pid);
-        seatEl.className='lv-seat occupied'+(pid===S.myId?' me':'');
-        if(avEl){avEl.textContent=ini(p?.username||'?');avEl.style.color=col(pid);}
-        if(nmEl)nmEl.textContent=(pid===S.myId?'أنت':p?.username)||'؟';
-      } else {
-        seatEl.className='lv-seat';
-        if(avEl){avEl.textContent='💺';avEl.style.color='';}
-        if(nmEl)nmEl.textContent='فاضي';
-      }
-    }
+    S.players=players;renderPlayers(players);RTC.drop(playerId);
+    if(newHostId===S.myId){S.isHost=true;}refreshStart(players.length);
   });
   sk.on('webrtc:offer',({from,offer})=>RTC.onOffer(from,offer));
   sk.on('webrtc:answer',({from,answer})=>RTC.onAnswer(from,answer));
@@ -1118,21 +984,9 @@ function bindSocket(sk){
   sk.on('round:start',data=>{
     TMR.stop();S.activePair=data.activePlayers;RTC.setActive(data.activePlayers.map(p=>p.id));
     showScreen('game');renderRound(data);TMR.start(data.duration,$('tnum'),$('tarc'));
-    // زرار تم — يظهر للاعبَين النشطَين والهوست
-    const skipBtn=$('btn-skip');
-    if(skipBtn){
-      const canSkip=S.isHost||data.activePlayers.some(p=>p.id===S.myId);
-      skipBtn.classList.toggle('hidden',!canSkip);
-      skipBtn.disabled=false;
-    }
-    // شات الكرسي — يظهر بس للـ 2 اللي دورهم
-    const isActive=data.activePlayers.some(p=>p.id===S.myId);
-    setSeatChat(isActive);
   });
   sk.on('round:end',({roundNumber})=>{
     TMR.stop();RTC.setActive([]);
-    setSeatChat(false);
-    $('btn-skip')?.classList.add('hidden');
     const t=$('rnd-trans'),tx=$('trans-txt');if(t)t.classList.remove('hidden');if(tx)tx.textContent='جولة '+roundNumber+' انتهت';
     const a=$('tarc');if(a)a.style.strokeDashoffset=0;
   });
@@ -1184,66 +1038,6 @@ function bindSocket(sk){
     else if(gr)gr.classList.add('hidden');
   });
   sk.on('game:aborted',({reason})=>{TMR.stop();RTC.dropAll();alert('انتهت اللعبة: '+reason);location.reload();});
-
-  // ── Play Again ──────────────────────────────────────────────────────────────
-  sk.on('game:ready:update', ({ readyCount, totalPlayers, readyIds }) => {
-    const now = $('ready-now'), tot = $('ready-total');
-    if (now) now.textContent = readyCount;
-    if (tot) tot.textContent = totalPlayers;
-    $('ready-counter')?.classList.remove('hidden');
-
-    // Show avatar dots for each ready player
-    const av = $('ready-avatars');
-    if (av) {
-      av.innerHTML = '';
-      S.players.forEach(p => {
-        const isReady = readyIds.includes(p.id);
-        const dot = document.createElement('div');
-        dot.title = p.username;
-        dot.style.cssText = `width:32px;height:32px;border-radius:50%;background:var(--lift);border:2px solid ${isReady ? 'var(--green)' : 'var(--br)'};display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:14px;color:${col(p.id)};transition:border-color .3s;`;
-        dot.textContent = ini(p.username);
-        av.appendChild(dot);
-      });
-    }
-  });
-
-  sk.on('game:restarted', ({ players, hostId }) => {
-    // Reset client state — keep same socket, same room
-    S.players  = players;
-    S.isHost   = (hostId === S.myId);
-    S.role     = null;
-    S.word     = null;
-    S.voted    = false;
-    S.lobbySeats = [];
-    TMR.stop();
-    RTC.dropAll();
-
-    // Reset ready-vote UI for next time
-    const ba = $('btn-again');
-    if (ba) { ba.disabled = false; ba.textContent = '🔄 العب مرة أخرى'; }
-    $('ready-counter')?.classList.add('hidden');
-    $('ready-hint')?.classList.add('hidden');
-    const av = $('ready-avatars'); if (av) av.innerHTML = '';
-
-    // Clear chat boxes
-    ['chat-msgs-waiting','chat-msgs-game'].forEach(id => {
-      const b = $(id); if (b) b.innerHTML = '';
-    });
-
-    // Go back to waiting room
-    $('rcode').textContent = S.roomCode;
-    showScreen('waiting');
-    renderPlayers(players);
-    refreshStart(players.length);
-    setupMic();
-  });
-  sk.on('chat:msg',(data)=>{
-    // اكتب في الشات العام في الشاشتين
-    appendChatMsg(data, GENERAL_CHAT_BOXES);
-    // لو الشات الكرسي شغال، اكتب فيه برضو
-    const sc=$('seat-chat');
-    if(sc&&sc.classList.contains('visible')) appendChatMsg(data,['seat-msgs']);
-  });
   sk.on('error',({message})=>{
     const a=document.querySelector('.screen.active');
     const id=a?a.id.replace('screen-',''):'lobby';
@@ -1308,35 +1102,13 @@ function bindButtons(){
   });
   $('spy-in').addEventListener('keydown',e=>{if(e.key==='Enter')$('btn-spy').click();});
 
-  // Lobby voice sit / leave
-  $('btn-lv-sit').addEventListener('click',()=>{
-    if(!S.socket)return;
-    const seated=(S.lobbySeats||[]).includes(S.myId);
-    S.socket.emit(seated?'lobby:leave':'lobby:sit');
-  });
-
-  // Skip round (تم)
-  $('btn-skip').addEventListener('click',()=>{
-    if(!S.socket)return;
-    $('btn-skip').disabled=true;
-    S.socket.emit('round:skip');
-  });
-
-  // Play again — ready vote
-  $('btn-again').addEventListener('click', () => {
-    if (!S.socket) return;
-    $('btn-again').disabled = true;
-    $('btn-again').textContent = '✅ أنا مستعد!';
-    $('ready-counter').classList.remove('hidden');
-    $('ready-hint').classList.remove('hidden');
-    S.socket.emit('game:ready');
-  });
+  // Play again
+  $('btn-again').addEventListener('click',()=>{RTC.dropAll();location.reload();});
 }
 
 /* ── BOOT ── */
 window.addEventListener('DOMContentLoaded',()=>{
   bindButtons();
-  initInlineChat();
   initIntro();
   initQuestionBtn();
 
@@ -1415,81 +1187,6 @@ function initQuestionBtn(){
   });
   closeBtn.addEventListener('click',()=>overlay.classList.remove('open'));
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open');});
-}
-
-/* ── CHAT ── */
-// كل الـ boxes اللي بتاخد الرسايل العامة
-const GENERAL_CHAT_BOXES = ['chat-msgs-waiting','chat-msgs-game'];
-
-function appendChatMsg({id, username, text}, boxes) {
-  const isMe = id === S.myId;
-  const targets = boxes || GENERAL_CHAT_BOXES;
-  targets.forEach(boxId => {
-    const box = $(boxId);
-    if (!box) return;
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;flex-direction:column;gap:2px;margin-bottom:4px;' + (isMe ? 'align-items:flex-end;' : 'align-items:flex-start;');
-    if (!isMe) {
-      const name = document.createElement('span');
-      name.style.cssText = 'font-family:var(--fm);font-size:9px;color:var(--lo);letter-spacing:.08em;padding:0 4px;';
-      name.textContent = username;
-      wrap.appendChild(name);
-    }
-    const bubble = document.createElement('div');
-    const isSeat = boxId === 'seat-msgs';
-    bubble.style.cssText = isSeat
-      ? 'background:' + (isMe ? 'rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.35)' : 'var(--lift);border:1px solid var(--br)') + ';border-radius:10px;padding:6px 11px;font-size:14px;color:var(--hi);font-family:var(--fa);direction:rtl;max-width:85%;word-break:break-word;line-height:1.5;'
-      : 'background:' + (isMe ? 'rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.2)' : 'var(--lift);border:1px solid var(--br)') + ';border-radius:10px;padding:6px 11px;font-size:13px;color:var(--hi);font-family:var(--fa);direction:rtl;max-width:85%;word-break:break-word;line-height:1.5;';
-    bubble.textContent = text;
-    wrap.appendChild(bubble);
-    box.appendChild(wrap);
-    box.scrollTop = box.scrollHeight;
-  });
-}
-
-function initInlineChat() {
-  // دالة الإرسال
-  function sendChat(inputId) {
-    const inp = $(inputId);
-    if (!inp) return;
-    const txt = inp.value.trim();
-    if (!txt || !S.socket) return;
-    S.socket.emit('chat:msg', { text: txt });
-    inp.value = '';
-  }
-
-  // شات الانتظار
-  $('chat-send-waiting')?.addEventListener('click', () => sendChat('chat-input-waiting'));
-  $('chat-input-waiting')?.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat('chat-input-waiting'); });
-
-  // شات اللعبة العام
-  $('chat-send-game')?.addEventListener('click', () => sendChat('chat-input-game'));
-  $('chat-input-game')?.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat('chat-input-game'); });
-
-  // شات الكرسي
-  $('seat-send')?.addEventListener('click', () => {
-    const inp = $('seat-input');
-    if (!inp) return;
-    const txt = inp.value.trim();
-    if (!txt || !S.socket) return;
-    S.socket.emit('chat:msg', { text: txt });
-    inp.value = '';
-  });
-  $('seat-input')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter') $('seat-send')?.click();
-  });
-}
-
-// تظهر/تخفي شات الكرسي
-function setSeatChat(visible) {
-  const sc = $('seat-chat');
-  if (!sc) return;
-  if (visible) {
-    sc.classList.add('visible');
-    $('seat-msgs').innerHTML = ''; // تمسح رسايل الجولة السابقة
-  } else {
-    sc.classList.remove('visible');
-  }
 }
 </script>
 </body>

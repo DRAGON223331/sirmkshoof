@@ -74,8 +74,6 @@ class Room {
     this.roundTimer   = null;
     this.voteTimer    = null;
     this.guessTimer   = null;
-    this.readySet     = new Set(); // players who pressed "play again"
-    this.lobbySeats   = [];        // max 2 socketIds sitting in lobby voice
   }
 
   /** Add a player to the room */
@@ -211,7 +209,7 @@ io.on('connection', (socket) => {
     socket.to(code).emit('room:playerJoined', {
       player  : { id: socket.id, username: username.trim(), isHost: false },
       players : room.getPlayerList(),
-      newPeerId: socket.id,
+      newPeerId: socket.id,  // existing players should open a connection to this ID
     });
 
     console.log(`[R] "${username}" joined room ${code} (${room.players.size} players)`);
@@ -303,75 +301,6 @@ io.on('connection', (socket) => {
     room.state = 'ended';
   });
 
-  // ── Chat ─────────────────────────────────────────────────────────────────
-  socket.on('chat:msg', ({ text }) => {
-    const room = rooms.get(roomCode);
-    if (!room) return;
-    const player = room.players.get(socket.id);
-    if (!player) return;
-    const msg = String(text).trim().slice(0, 200);
-    if (!msg) return;
-    io.to(roomCode).emit('chat:msg', {
-      id       : socket.id,
-      username : player.username,
-      text     : msg,
-      ts       : Date.now(),
-    });
-  });
-
-  // ── Lobby Voice Seats ────────────────────────────────────────────────────
-  socket.on('lobby:sit', () => {
-    const room = rooms.get(roomCode);
-    if (!room || room.state !== 'lobby') return;
-    if (room.lobbySeats.includes(socket.id)) return; // already seated
-    if (room.lobbySeats.length >= 2) return;          // seats full
-
-    room.lobbySeats.push(socket.id);
-    io.to(roomCode).emit('lobby:seats', { seats: room.lobbySeats });
-  });
-
-  socket.on('lobby:leave', () => {
-    const room = rooms.get(roomCode);
-    if (!room) return;
-    room.lobbySeats = room.lobbySeats.filter(id => id !== socket.id);
-    io.to(roomCode).emit('lobby:seats', { seats: room.lobbySeats });
-  });
-
-  // ── Skip Round (host or active speaker) ──────────────────────────────────
-  socket.on('round:skip', () => {
-    const room = rooms.get(roomCode);
-    if (!room || room.state !== 'playing') return;
-    // Only host or one of the active pair can skip
-    const lastRound = room.rounds[room.rounds.length - 1];
-    const activePair = lastRound ? lastRound.activePlayers.map(p => p.id) : [];
-    const canSkip = socket.id === room.hostId || activePair.includes(socket.id);
-    if (!canSkip) return;
-
-    clearTimeout(room.roundTimer);
-    io.to(room.code).emit('round:end', { roundNumber: room.currentRound, skipped: true });
-    setTimeout(() => startRound(room), CONFIG.INTER_ROUND_MS);
-    console.log(`[Round ${room.currentRound}] Skipped by ${room.players.get(socket.id)?.username}`);
-  });
-
-  // ── Play Again (Ready Vote) ───────────────────────────────────────────────
-  socket.on('game:ready', () => {
-    const room = rooms.get(roomCode);
-    if (!room || room.state !== 'ended') return;
-
-    room.readySet.add(socket.id);
-
-    io.to(roomCode).emit('game:ready:update', {
-      readyCount   : room.readySet.size,
-      totalPlayers : room.players.size,
-      readyIds     : Array.from(room.readySet),
-    });
-
-    // When all current players are ready → restart
-    if (room.readySet.size >= room.players.size) {
-      restartRoom(room);
-    }
-  });
-
   // ── Disconnect ────────────────────────────────────────────────────────────
   socket.on('disconnect', () => {
     console.log(`[-] ${socket.id} disconnected`);
@@ -381,10 +310,6 @@ io.on('connection', (socket) => {
     if (!room) return;
 
     room.removePlayer(socket.id);
-
-    // Clear from lobby seats if was seated
-    room.lobbySeats = room.lobbySeats.filter(id => id !== socket.id);
-    io.to(roomCode).emit('lobby:seats', { seats: room.lobbySeats });
 
     if (room.players.size === 0) {
       room.clearTimers();
@@ -399,19 +324,6 @@ io.on('connection', (socket) => {
       newHostId  : room.hostId,
     });
 
-    // If game ended and a player leaves, re-check ready count
-    if (room.state === 'ended') {
-      room.readySet.delete(socket.id);
-      io.to(roomCode).emit('game:ready:update', {
-        readyCount   : room.readySet.size,
-        totalPlayers : room.players.size,
-        readyIds     : Array.from(room.readySet),
-      });
-      if (room.readySet.size >= room.players.size && room.players.size > 0) {
-        restartRoom(room);
-      }
-    }
-
     // If game is in progress and we drop below minimum, end gracefully
     if (room.state === 'playing' && room.players.size < 2) {
       room.clearTimers();
@@ -420,29 +332,6 @@ io.on('connection', (socket) => {
     }
   });
 });
-
-// ─── Restart Room ─────────────────────────────────────────────────────────────
-
-function restartRoom(room) {
-  room.clearTimers();
-  room.state        = 'lobby';
-  room.word         = null;
-  room.spyId        = null;
-  room.currentRound = 0;
-  room.rounds       = [];
-  room.pairQueue    = [];
-  room.votes.clear();
-  room.readySet.clear();
-  room.lobbySeats  = [];
-  room.players.forEach(p => { p.isSpy = false; });
-
-  io.to(room.code).emit('game:restarted', {
-    players : room.getPlayerList(),
-    hostId  : room.hostId,
-  });
-
-  console.log(`[R] Room ${room.code} restarted — back to lobby`);
-}
 
 // ─── Game Logic ───────────────────────────────────────────────────────────────
 
